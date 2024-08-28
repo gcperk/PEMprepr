@@ -7,6 +7,7 @@
 create_pemr_project(
   path = ".",
   aoi_name,
+  aoi_file = NULL,
   rstudio = rstudioapi::isAvailable(),
   open = rlang::is_interactive()
 )
@@ -17,6 +18,9 @@ created, provided that the parent path exists.}
 
 \item{aoi_name}{The name of your area of interest (AOI), will be used to
 name the project.}
+
+\item{aoi_file}{Path to a file (e.g., .shp or .gpkg) defining the project
+area of interest}
 
 \item{rstudio}{If \code{TRUE}, calls \code{\link[usethis:use_rstudio]{use_rstudio()}} to make the new package or
 project into an \href{https://r-pkgs.org/workflow101.html#sec-workflow101-rstudio-projects}{RStudio Project}.

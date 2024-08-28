@@ -19,6 +19,8 @@
 #'
 #' @param aoi_name The name of your area of interest (AOI), will be used to 
 #'     name the project. 
+#' @param aoi_file Path to a file (e.g., .shp or .gpkg) defining the project
+#'     area of interest
 #' @inheritParams usethis::create_project
 #'
 #' @return path to the newly created project
@@ -31,6 +33,7 @@
 create_pemr_project <- function(
   path = ".",
   aoi_name,
+  aoi_file = NULL,
   rstudio = rstudioapi::isAvailable(),
   open = rlang::is_interactive()
 ) {
@@ -51,6 +54,12 @@ create_pemr_project <- function(
   fid <- make_fid(project_dirs)
 
   saveRDS(fid, file.path("_meta", "fid.rds"))
+
+  if (!is.null(aoi_file)) {
+    fs::file_copy(aoi_file, fid$dir_0_AOI$path_abs)
+  } else {
+    cli::cli_alert_warning("No AOI file specified. You will need to copy an AOI file to {.path {fid$dir_0_AOI$path_abs}}")
+  }
 
   if (open) {
     if (usethis::proj_activate(usethis::proj_get())) {
