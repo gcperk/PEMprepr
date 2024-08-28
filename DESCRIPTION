@@ -3,7 +3,7 @@ Title: Prepare project for PEMr analysis
 Version: 0.0.0.9000
 Authors@R: c(
     person("Colin", "Chisholm", , "Colin.Chisholm@unbc.ca", role = c("aut", "cre")),
-    person("Gen", "Perkins", , "Genevieve.Perkins@gov.bc.ca", role = "aut",
+    person("Gen", "Perkins", , "gperkins@ninoxconsulting.ca", role = "aut",
            comment = c(ORCID = "0000-0003-2663-5904")),
     person("Will", "MacKenzie", , "Will.MacKenzie@gov.bc.ca", role = "aut"),
     person("Clair", "Armour", , "claire.armour@gov.bc.ca", role = "aut"),
