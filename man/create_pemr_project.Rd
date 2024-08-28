@@ -15,7 +15,8 @@ create_pemr_project(
 \item{path}{A path. If it exists, it is used. If it does not exist, it is
 created, provided that the parent path exists.}
 
-\item{aoi_name}{The name of your area of interest (AOI), will be used to name the project.}
+\item{aoi_name}{The name of your area of interest (AOI), will be used to
+name the project.}
 
 \item{rstudio}{If \code{TRUE}, calls \code{\link[usethis:use_rstudio]{use_rstudio()}} to make the new package or
 project into an \href{https://r-pkgs.org/workflow101.html#sec-workflow101-rstudio-projects}{RStudio Project}.
@@ -44,14 +45,14 @@ All of the default directories for a PEM project will be created, as will
 template R files for the different stages of the analysis.
 
 A small \code{fid.RDS} file will be created inside a \verb{_meta} folder, which holds
-the directory structure. This file is read and consulted by many functions
-in the PEMr family of packages for reading and writing files to/from their
+the directory structure. This file is read and consulted by many functions in
+the PEMr family of packages for reading and writing files to/from their
 default locations.
 
-As much as possible it is recommended to not deviate from the structure
-set up here, so that analyses are understandable and reproducible by collaborators
-and from project to project. If there is something missing in the default
-setup, please open an issue at https://github.com/bcgov/PEMr
+As much as possible it is recommended to not deviate from the structure set
+up here, so that analyses are understandable and reproducible by
+collaborators and from project to project. If there is something missing in
+the default setup, please open an issue at https://github.com/bcgov/PEMr
 }
 \examples{
 \dontrun{

@@ -1,6 +1,6 @@
 #' Create a new PEMr project
 #' 
-#' It will create a new project directory inside the directory specified in 
+#' It will create a new project directory inside the directory specified in
 #' `path`, which will be created if necessary. By default opens as a new project
 #' in a new RStudio window.
 #' 
@@ -8,16 +8,17 @@
 #' template R files for the different stages of the analysis.
 #' 
 #' A small `fid.RDS` file will be created inside a `_meta` folder, which holds
-#' the directory structure. This file is read and consulted by many functions
-#' in the PEMr family of packages for reading and writing files to/from their 
+#' the directory structure. This file is read and consulted by many functions in
+#' the PEMr family of packages for reading and writing files to/from their
 #' default locations.
 #' 
-#' As much as possible it is recommended to not deviate from the structure 
-#' set up here, so that analyses are understandable and reproducible by collaborators
-#' and from project to project. If there is something missing in the default 
-#' setup, please open an issue at https://github.com/bcgov/PEMr
+#' As much as possible it is recommended to not deviate from the structure set
+#' up here, so that analyses are understandable and reproducible by
+#' collaborators and from project to project. If there is something missing in
+#' the default setup, please open an issue at https://github.com/bcgov/PEMr
 #'
-#' @param aoi_name The name of your area of interest (AOI), will be used to name the project. 
+#' @param aoi_name The name of your area of interest (AOI), will be used to 
+#'     name the project. 
 #' @inheritParams usethis::create_project
 #'
 #' @return path to the newly created project
