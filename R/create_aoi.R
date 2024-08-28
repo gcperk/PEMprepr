@@ -1,23 +1,46 @@
-#' Title
+#' Create a rectangular AOI bounding box
+#' 
+#' Create a rectangular AOI bounding box containing your AOI, that is snapped 
+#' to a 100m grid to facilitate alignment with rasters.
 #'
-#' @param aoi_dir
-#' @param out_dir
-#' @param aoi_vec
+#' @param aoi_dir the directory containing the AOI boundary file. If not 
+#'     specified uses the default from the `fid` folder structure
+#' @param filename the input file name. If not specified, and there is only one 
+#'     spatial file in `aoi_dir`, it will use that.
+#' @param out_dir the directory to hold the snapped boundary file. If not 
+#'     specified uses the default from the `fid` folder structure
+#' @param ... Arguments passed on to [aoi_snap()]
 #'
-#' @return
+#' @return path to the snapped aoi file, invisibly
 #' @export
 #'
 #' @examples
-create_aoi <- function(aoi_dir = file.path(fid$shape_dir_0010[2]),
-                       out_dir = file.path(fid$shape_dir_1010[1]),
-                       aoi_vec = "aoi.gpkg"){       ## input raster
-  aoi <- sf::st_read(file.path(aoi_dir, aoi_vec))
-  aoi_bb <- aoi_snap(aoi, method = "expand")
-  aoi <- sf::st_read(file.path(aoi_dir, aoi_vec))
-  aoi_ls <- aoi_snap_watershed(aoi, "expand")
-  #sf::st_write(aoi, file.path(out_dir,"aoi.gpkg"), append = FALSE)
-  sf::st_write(aoi_bb, file.path(out_dir,"aoi_snapped.gpkg"), append = FALSE)
-  sf::st_write(aoi_ls, file.path(out_dir,"aoi_ls_snap.gpkg"), append = FALSE)
+#' \dontrun{
+#'   create_aoi(filename = "my_aoi.gpkg")
+#' }
+create_aoi <- function(
+    aoi_dir = fid$dir_0010_vector$path_abs,
+    filename = NULL,
+    out_dir = fid$dir_1010_vector$path_abs,
+    ...
+) {
+  if (is.null(filename)) {
+    # If there is only one file there, use that
+    files <- list.files(aoi_dir, pattern = "([.]gpkg)|([.]shp)$")
+    if (length(files) == 1L) {
+      filename <- files
+      cli::cli_alert_info("File {filename} found and no {.var filename} provided. Using {filename}.")
+    } else {
+      cli::cli_abort("{length(files)} file{?s} found in {.path {aoi_dir} and no {.var filename}")
+    }
+  }
 
-  return(TRUE)
+  aoi <- sf::st_read(file.path(aoi_dir, filename))
+
+  aoi_bb <- aoi_snap(aoi, ...)
+
+  output_file <- file.path(out_dir, "aoi_snapped.gpkg")
+  sf::st_write(aoi_bb, output_file, append = FALSE)
+
+  invisible(output_file)
 }
