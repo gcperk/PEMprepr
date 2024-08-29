@@ -17,9 +17,11 @@ License: Apache License (>= 2)
 URL: https://github.com/ninoxconsulting/PEMprepr
 BugReports: https://github.com/ninoxconsulting/PEMprepr/issues
 Imports: 
+    cli,
     fs,
     rlang,
     rstudioapi,
+    sf,
     usethis,
     withr
 Encoding: UTF-8

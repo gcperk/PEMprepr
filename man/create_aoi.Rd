@@ -5,15 +5,15 @@
 \title{Create a rectangular AOI bounding box}
 \usage{
 create_aoi(
-  aoi_dir = fid$dir_0010_vector$path_abs,
+  aoi_dir = read_fid()$dir_0010_vector$path_abs,
   filename = NULL,
-  out_dir = fid$dir_1010_vector$path_abs,
+  out_dir = read_fid()$dir_1010_vector$path_abs,
   ...
 )
 }
 \arguments{
 \item{aoi_dir}{the directory containing the AOI boundary file. If not
-specified uses the default from the \code{fid} folder structure}
+specified uses the default from the \code{read_fid()} folder structure}
 
 \item{filename}{the input file name. If not specified, and there is only one
 spatial file in \code{aoi_dir}, it will use that.}
@@ -32,6 +32,6 @@ to a 100m grid to facilitate alignment with rasters.
 }
 \examples{
 \dontrun{
-  create_aoi(filename = "my_aoi.gpkg")
+create_aoi(filename = "my_aoi.gpkg")
 }
 }

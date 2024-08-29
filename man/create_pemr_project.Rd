@@ -60,6 +60,6 @@ the default setup, please open an issue at https://github.com/bcgov/PEMr
 }
 \examples{
 \dontrun{
-  create_pemr_project("AOI_Neptune")
+create_pemr_project("AOI_Neptune")
 }
 }

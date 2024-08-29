@@ -79,7 +79,7 @@ create_directories <- function(file = fs::path_package("PEMprepr", "extdata/dire
     dir_df$base_dir, dir_df$subdir_1, dir_df$subdir_2, dir_df$subdir_3
   )
 
-  lapply(c(project_dirs, "_meta"), use_directory)
+  lapply(c(project_dirs, "_meta"), usethis::use_directory)
   project_dirs
 }
 
@@ -87,7 +87,7 @@ write_core_files <- function(data) {
   core_files <- list.files(fs::path_package("PEMprepr", "templates", "core"))
   lapply(core_files, function(x) {
     fpath <- fs::path("core", x)
-    use_template(fpath, x, data = data, package = "PEMprepr")
+    usethis::use_template(fpath, x, data = data, package = "PEMprepr")
   })
 }
 
