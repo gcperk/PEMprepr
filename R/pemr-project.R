@@ -1,24 +1,24 @@
 #' Create a new PEMr project
-#' 
+#'
 #' It will create a new project directory inside the directory specified in
 #' `path`, which will be created if necessary. By default opens as a new project
 #' in a new RStudio window.
-#' 
+#'
 #' All of the default directories for a PEM project will be created, as will
 #' template R files for the different stages of the analysis.
-#' 
+#'
 #' A small `fid.RDS` file will be created inside a `_meta` folder, which holds
 #' the directory structure. This file is read and consulted by many functions in
 #' the PEMr family of packages for reading and writing files to/from their
 #' default locations.
-#' 
+#'
 #' As much as possible it is recommended to not deviate from the structure set
 #' up here, so that analyses are understandable and reproducible by
 #' collaborators and from project to project. If there is something missing in
 #' the default setup, please open an issue at https://github.com/bcgov/PEMr
 #'
-#' @param aoi_name The name of your area of interest (AOI), will be used to 
-#'     name the project. 
+#' @param aoi_name The name of your area of interest (AOI), will be used to
+#'     name the project.
 #' @param aoi_file Path to a file (e.g., .shp or .gpkg) defining the project
 #'     area of interest
 #' @inheritParams usethis::create_project
@@ -28,16 +28,15 @@
 #'
 #' @examples
 #' \dontrun{
-#'   create_pemr_project("AOI_Neptune")
+#' create_pemr_project("AOI_Neptune")
 #' }
 create_pemr_project <- function(
-  path = ".",
-  aoi_name,
-  aoi_file = NULL,
-  rstudio = rstudioapi::isAvailable(),
-  open = rlang::is_interactive()
-) {
-  path = fs::path(path, aoi_name)
+    path = ".",
+    aoi_name,
+    aoi_file = NULL,
+    rstudio = rstudioapi::isAvailable(),
+    open = rlang::is_interactive()) {
+  path <- fs::path(path, aoi_name)
 
   # Create project but don't open yet as we need to add the infrastructure
   project_path <- usethis::create_project(path, rstudio = rstudio, open = FALSE)
@@ -112,11 +111,11 @@ make_fid <- function(dirs) {
 }
 
 #' Read folder structure file
-#' 
+#'
 #' Read the fid file from the `_meta` directory
-#' 
+#'
 #' @return list containing folder structure
-#' 
+#'
 #' @export
 read_fid <- function() {
   readRDS(file.path("_meta", "fid.RDS"))
