@@ -116,6 +116,8 @@ make_fid <- function(dirs) {
 #' Read folder structure file
 #'
 #' Read the fid file from the `_meta` directory
+#' 
+#' @param fid_path Path to the fid file. Defaults to `"_meta/fid.RDS"`
 #'
 #' @return list containing folder structure
 #'

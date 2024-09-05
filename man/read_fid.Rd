@@ -6,6 +6,9 @@
 \usage{
 read_fid(fid_path = file.path("_meta", "fid.RDS"))
 }
+\arguments{
+\item{fid_path}{Path to the fid file. Defaults to \code{"_meta/fid.RDS"}}
+}
 \value{
 list containing folder structure
 }

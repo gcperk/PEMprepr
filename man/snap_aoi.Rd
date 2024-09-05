@@ -48,6 +48,6 @@ Having the AOI set 100m break-points facilitates this.
 ## Load sf object
 aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 ## snap aoi to nearest 100m
-snap_aoi(aoi_file)
+snap_aoi(aoi_file, write_output = FALSE)
 
 }
