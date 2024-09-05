@@ -38,6 +38,9 @@ create_pemr_project <- function(
     open = rlang::is_interactive()) {
   path <- fs::path(path, aoi_name)
 
+  # force early evaluation of file path before we switch projects
+  force(aoi_file)
+
   # Create project but don't open yet as we need to add the infrastructure
   project_path <- usethis::create_project(path, rstudio = rstudio, open = FALSE)
 
@@ -102,7 +105,7 @@ make_fid <- function(dirs) {
 
   fid <- lapply(fid, function(x) {
     list(
-      "path_rel" = x[1],
+      "path_rel" = fs::path(x[1]),
       "path_abs" = fs::path_abs(x[1])
     )
   })
