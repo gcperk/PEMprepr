@@ -71,9 +71,9 @@ snap_aoi <- function(
   box
 }
 
-look_for_aoi <- function() {
+look_for_aoi <- function(aoi_dir = read_fid()$dir_0010_vector$path_abs) {
     # Look for aoi file in default directory
-    aoi_dir <- read_fid()$dir_0010_vector$path_abs
+    
     files <- list.files(
       aoi_dir,
       pattern = "([.]gpkg)|([.]shp)$"
@@ -81,7 +81,7 @@ look_for_aoi <- function() {
     if (length(files) == 1L) {
       # If there is only one file there, use that
       aoi <- files
-      cli::cli_alert_info("No {.var aoi} provided, but file {file} found. Using {file}.")
+      cli::cli_alert_info("No {.var aoi} provided, but file {.path {file}} found. Using {file}.")
     } else {
       cli::cli_abort("{length(files)} file{?s} found in {.path {aoi_dir}} and no {.var aoi} provided.")
     }
