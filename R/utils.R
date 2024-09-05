@@ -11,3 +11,10 @@ read_fid <- function(fid_path = file.path("_meta", "fid.rds")) {
   if (!fs::file_exists(fid_path)) return(NULL)
   readRDS(fid_path)
 }
+
+
+if (!exists("%||%", envir = baseenv())) {
+  `%||%` <- function(x, y) {
+    if (is_null(x)) y else x
+  }
+}
