@@ -120,6 +120,7 @@ make_fid <- function(dirs) {
 #' @return list containing folder structure
 #'
 #' @export
-read_fid <- function() {
-  readRDS(file.path("_meta", "fid.RDS"))
+read_fid <- function(fid_path = file.path("_meta", "fid.RDS")) {
+  if (!fs::file_exists(fid_path)) return(NULL)
+  readRDS(fid_path)
 }
