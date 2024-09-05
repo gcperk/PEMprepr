@@ -15,6 +15,6 @@ read_fid <- function(fid_path = file.path("_meta", "fid.rds")) {
 
 if (!exists("%||%", envir = baseenv())) {
   `%||%` <- function(x, y) {
-    if (is_null(x)) y else x
+    if (is.null(x)) y else x
   }
 }
