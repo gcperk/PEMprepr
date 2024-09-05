@@ -30,7 +30,7 @@ create_aoi <- function(
       filename <- files
       cli::cli_alert_info("File {filename} found and no {.var filename} provided. Using {filename}.")
     } else {
-      cli::cli_abort("{length(files)} file{?s} found in {.path {aoi_dir} and no {.var filename}")
+      cli::cli_abort("{length(files)} file{?s} found in {.path {aoi_dir}} and no {.var filename}")
     }
   }
 
