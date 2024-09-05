@@ -19,11 +19,7 @@ BugReports: https://github.com/ninoxconsulting/PEMprepr/issues
 Imports: 
     cli,
     fs,
-    rlang,
-    rstudioapi,
-    sf,
-    usethis,
-    withr
+    sf
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
