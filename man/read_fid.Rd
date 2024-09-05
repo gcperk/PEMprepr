@@ -4,7 +4,7 @@
 \alias{read_fid}
 \title{Read folder structure file}
 \usage{
-read_fid()
+read_fid(fid_path = file.path("_meta", "fid.RDS"))
 }
 \value{
 list containing folder structure
