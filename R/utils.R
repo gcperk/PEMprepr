@@ -14,7 +14,7 @@ read_fid <- function(fid_path = file.path("_meta", "fid.rds")) {
   readRDS(fid_path)
 }
 
-
+# Add NULL default operator if doesn't exist (added to base R in v4.4)
 if (!exists("%||%", envir = baseenv())) {
   `%||%` <- function(x, y) {
     if (is.null(x)) y else x
