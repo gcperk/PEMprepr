@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/ninoxconsulting/PEMprepr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ninoxconsulting/PEMprepr/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/ninoxconsulting/PEMprepr/graph/badge.svg)](https://app.codecov.io/gh/ninoxconsulting/PEMprepr)
 <!-- badges: end -->
 
 The goal of PEMprepr is to …
