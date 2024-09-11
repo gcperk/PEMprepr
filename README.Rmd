@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-# PEMprepr
+# PEMprepr is a subpackage within the [PEMr](https://github.com/ninoxconsulting/PEMr) family of packages. This package contains functions to prepare all the base data needed to develop sample plans and generate models for building a predictive ecosystem map. As part of the PEMr package users will be provided with a framework of scripts to act as a workflow.
+
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ninoxconsulting/PEMprepr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ninoxconsulting/PEMprepr/actions/workflows/R-CMD-check.yaml)
@@ -28,6 +29,7 @@ You can install the development version of PEMprepr from [GitHub](https://github
 ``` r
 # install.packages("pak")
 pak::pak("ninoxconsulting/PEMprepr")
+
 ```
 
 ## Example
