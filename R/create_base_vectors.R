@@ -1,9 +1,9 @@
 #' Generates base information vectors for sample planning and modelling using bcdata package
 #'
-#' @param in_aoi An  `sf` object (e.g. polygon), which has been snapped to a common extend.
+#' @param aoi An  `sf` object (e.g. polygon), which has been snapped to a common extend.
 #'    This is commonly the output of the snap_aoi() function. A default location and name are
 #'    applied in line with standard workflow.
-#' @param out_path A character string of filepath which points to output location. A default
+#' @param out_dir A character string of filepath which points to output location. A default
 #'    location and name are applied in line with standard workflow.
 #'
 #' @return multiple gpkg files output directly to output directory
