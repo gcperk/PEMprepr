@@ -59,6 +59,11 @@ snap_aoi <- function(
       fs::dir_create(out_dir, recurse = TRUE)
     }
     output_file <- fs::path(fs::path_abs(out_dir), "aoi_snapped.gpkg")
+    if(fs::file_exists(output_file)){
+      cli::cli_alert_warning(
+        "Snapped aoi already exists in {.path {output_file}}"
+      )
+    }
     sf::st_write(box, output_file, append = FALSE, quiet = TRUE)
     cli::cat_line()
     cli::cli_alert_success(
