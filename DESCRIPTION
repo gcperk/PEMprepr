@@ -21,7 +21,11 @@ BugReports: https://github.com/ninoxconsulting/PEMprepr/issues
 Imports: 
     cli,
     fs,
-    sf
+    sf,
+    terra,
+    PEMr
+Remotes:
+    ninoxconsulting/PEMr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
