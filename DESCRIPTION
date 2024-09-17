@@ -2,11 +2,13 @@ Package: PEMprepr
 Title: Prepare project for PEMr analysis
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Colin", "Chisholm", , "Colin.Chisholm@unbc.ca", role = c("aut", "cre")),
-    person("Gen", "Perkins", , "gperkins@ninoxconsulting.ca", role = "aut",
+    person("Genevieve", "Perkins", , "gperkins@ninoxconsulting.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-2663-5904")),
-    person("Will", "MacKenzie", , "Will.MacKenzie@gov.bc.ca", role = "aut"),
-    person("Clair", "Armour", , "claire.armour@gov.bc.ca", role = "aut"),
+    person("Will", "McKenzie", , "Will.MacKenzie@gov.bc.ca", role = "aut"),      
+    person("Kiri", "Daust", , "kiri.daust@gov.bc.ca", role = "aut"),
+    person("Colin", "Chisholm", , "Colin.Chisholm@unbc.ca", role = "aut"),
+    person("Matthew", "Coghill", , "matthewcoghill@live.ca", role = "aut"),
+    person("Claire", "Armour", , "claire.armour@gov.bc.ca", role = "aut"),
     person("Andy", "Teucher", , "andy@andyteucher.ca", role = "aut",
            comment = c(ORCID = "0000-0002-7840-692X")),
     person("Province of British Columbia", role = "cph")
