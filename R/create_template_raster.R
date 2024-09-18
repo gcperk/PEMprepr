@@ -28,10 +28,10 @@
 #'     out_dir = PEMr::read_fid()$dir_1020_covariates$path_rel,
 #'     write_output = TRUE)
 #'}
-create_template_raster <- function(aoi = fs::path(PEMr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
+create_template_raster <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
                                    res = 25,
                                    filename = "template.tif",
-                                   out_dir = PEMr::read_fid()$dir_1020_covariates$path_rel,
+                                   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                                    write_output = TRUE) {
 
   if (!is.numeric(res)) {
