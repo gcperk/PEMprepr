@@ -23,6 +23,8 @@ Imports:
     fs,
     sf,
     terra,
+    bcdata,
+    dplyr,
     PEMr
 Remotes:
     ninoxconsulting/PEMr
