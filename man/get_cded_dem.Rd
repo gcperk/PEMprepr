@@ -34,6 +34,7 @@ create_raster_template().
 }
 \examples{
 \dontrun{
-get_cded_dem(aoi_bb = file.path(fid$shape_dir_1010[2],"aoi_snapped.gpkg"), res = 5, out_dir = fid$cov_dir_1020[2]))
+get_cded_dem(aoi_bb = file.path(fid$shape_dir_1010[2],"aoi_snapped.gpkg"),
+    res = 5, out_dir = fid$cov_dir_1020[2]))
 }
 }

@@ -24,9 +24,10 @@ multiple gpkg files written directly to out_put directory
 Generates base information vectors for sample planning and modelling using bcdata package
 }
 \examples{
+\dontrun{
 #' ## Load snapped aoi object
 aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 sn_aoi <- snap_aoi(aoi_file, write_output = FALSE)
 create_base_vectors(sn_aoi, out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs)
-
+}
 }

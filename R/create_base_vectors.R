@@ -10,11 +10,12 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' #' ## Load snapped aoi object
 #' aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 #' sn_aoi <- snap_aoi(aoi_file, write_output = FALSE)
 #' create_base_vectors(sn_aoi, out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs)
-#'
+#'}
 create_base_vectors <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
                                 out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs) {
   # # testing
