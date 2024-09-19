@@ -11,6 +11,7 @@
 #'     If `TRUE` (default), will write to `out_dir`
 #' @param out_dir  the root directory to hold the cded dem spatRast file. If not
 #'     specified uses the default from the `fid` folder structure.
+#' @inheritParams terra::writeRaster
 #'
 #' @return a spatRast file of CDED data
 #' @export
@@ -23,7 +24,8 @@
 get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
                          res = 5,
                          out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
-                         write_output = TRUE) {
+                         write_output = TRUE,
+                         overwrite = FALSE) {
   if (inherits(aoi, c("character"))) {
     aoi <- terra::rast(aoi)
   } else if (!inherits(aoi, c("SpatRaster"))) {
@@ -46,7 +48,7 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
     if (!fs::dir_exists(fs::path(output_dir))) {
       fs::dir_create(fs::path(output_dir), recurse = TRUE)
     }
-    terra::writeRaster(cded, fs::path(output_dir, "dem.tif"), overwrite = FALSE)
+    terra::writeRaster(cded, fs::path(output_dir, "dem.tif"), overwrite = overwrite)
     cli::cat_line()
     cli::cli_alert_success(
       "CDED dem raster written to {.path {output_dir}}"
