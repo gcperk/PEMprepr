@@ -15,6 +15,7 @@
 #'    subfolder labelled with the resolution.
 #' @param write_output should the template raster be written to disk?
 #'     If `TRUE` (default), will write to `out_dir`
+#' @inheritParams terra::writeRaster
 #'
 #' @return a terra raster
 #' @export
