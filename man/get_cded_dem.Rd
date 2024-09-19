@@ -9,7 +9,8 @@ get_cded_dem(
     "template.tif"),
   res = 5,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
-  write_output = TRUE
+  write_output = TRUE,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ specified uses the default from the \code{fid} folder structure.}
 
 \item{write_output}{should the snapped aoi bounding box be written to disk?
 If \code{TRUE} (default), will write to \code{out_dir}}
+
+\item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
 }
 \value{
 a spatRast file of CDED data
