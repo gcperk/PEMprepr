@@ -73,18 +73,22 @@ create_base_vectors <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vec
   get_fire_severity(aoi, out_dir)
   get_parks(aoi, out_dir)
   get_transmission_lines(aoi, out_dir)
-  return(print(paste("Layers have been downloaded and saved to", out_dir)))
+
+  cli::cat_line()
+  cli::cli_alert_success(
+    "Layers downloaded and to written to {.path {out_dir}}"
+  )
 }
 
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
-  message("\rDownloading BEC layers")
+  #message("\rDownloading BEC layers")
 
   # # 1) BEC Biogeographical linework
-  bec <- bcdata::bcdc_query_geodata("f358a53b-ffde-4830-a325-a5a03ff672c3") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::select("MAP_LABEL") %>%
-    bcdata::collect() %>%
+  bec <- bcdata::bcdc_query_geodata("f358a53b-ffde-4830-a325-a5a03ff672c3") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
+    bcdata::select("MAP_LABEL") |>
+    bcdata::collect() |>
     dplyr::select("MAP_LABEL") %>%
     {
       if (nrow(.) > 0) sf::st_intersection(., aoi) else .
@@ -92,6 +96,10 @@ get_BEC <- function(aoi, out_dir) {
 
   if (sf::st_crs(aoi) == sf::st_crs(bec)) {
     sf::st_write(bec, fs::path(out_dir, "bec.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success(
+      "Bec layer downloaded and to written to {.path {out_dir}}"
+    )
   } else {
     # add conversion
     message("convert or setting crs for bec data download")
@@ -103,17 +111,20 @@ get_BEC <- function(aoi, out_dir) {
 get_VRI <- function(aoi, out_dir) {
   message("\rDownloading VRI layers")
 
-  vri <- bcdata::bcdc_query_geodata("2ebb35d8-c82f-4a17-9c96-612ac3532d55") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1")) %>% # Treed sites
-    bcdata::collect() %>%
+  vri <- bcdata::bcdc_query_geodata("2ebb35d8-c82f-4a17-9c96-612ac3532d55") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
+    bcdata::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1")) |> # Treed sites
+    bcdata::collect() |>
     dplyr::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1")) %>%
     {
       if (nrow(.) > 0) sf::st_intersection(., aoi) else .
     }
 
-  st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
-
+  sf::st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
+  cli::cat_line()
+  cli::cli_alert_success(
+    "VRI layer downloaded and to written to {.path {out_dir}}"
+  )
   # post process VRI data into classes:
 
   # Depending on the study area we want to focus on sampling in older areas - class 4 (60-80) or 5 (80 + )
@@ -121,14 +132,14 @@ get_VRI <- function(aoi, out_dir) {
   # class 1 and 2 (0 - 40 yrs)
   # class 1-3 (0 - 60 years)
 
-  vri_class2 <- vri %>%
-    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) %>%
+  vri_class2 <- vri |>
+    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) |>
     dplyr::filter(age_class < 3)
 
   sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
 
-  vri_class3 <- vri %>%
-    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) %>%
+  vri_class3 <- vri |>
+    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) |>
     dplyr::filter(age_class == 3)
 
   sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
@@ -141,7 +152,7 @@ get_VRI <- function(aoi, out_dir) {
   # # STILL TO DO - for areas with deciduous leading (AT, EP) Aspen and paper burch these should be seperated using the code "SPECIES_CD_1" == AT|EP.
   # # ie important in Date Creek
   #
-  vri_decid <- vri %>%
+  vri_decid <- vri |>
     dplyr::filter(SPECIES_CD_1 %in% c("AT", "EP")) # note might need to adjust for some areas of interest
   sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
 }
@@ -150,7 +161,7 @@ get_VRI <- function(aoi, out_dir) {
 ### 3) Get harvest history and FTEN --------------------------------
 get_harvest <- function(aoi, out_dir) {
   # 3) Download recent cutblocks (within last 20 years)
-  message("\rDownloading cutblock layers")
+  #message("\rDownloading cutblock layers")
   # Uses date filter which filters cutblock ages less than 20 years, or 7305 days
   cutblocks <- bcdata::bcdc_query_geodata("b1b647a6-f271-42e0-9cd0-89ec24bce9f7") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -166,7 +177,7 @@ get_harvest <- function(aoi, out_dir) {
   sf::st_write(cutblocks, fs::path(out_dir, "cutblocks.gpkg"), append = FALSE)
 
   # 4) ften  - Download latest harvest layer
-  message("\rDownloading ften harvest layers")
+  #message("\rDownloading ften harvest layers")
 
   ften <- bcdata::bcdc_query_geodata("cff7b8f7-6897-444f-8c53-4bb93c7e9f8b") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
@@ -178,12 +189,18 @@ get_harvest <- function(aoi, out_dir) {
     ) |>
     dplyr::filter(ISSUE_DATE > 2000) # might need to adjust this to dynamic
 
-  st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
+  sf::st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
 
 
   cutblocks_ften <- dplyr::bind_rows(cutblocks, ften)
 
   sf::st_write(cutblocks_ften, fs::path(out_dir, "cutblocks_ften.gpkg"), append = FALSE)
+
+  cli::cat_line()
+  cli::cli_alert_success(
+    "harvest layers downloaded and to written to {.path {out_dir}}"
+  )
+
 }
 
 ### 5) TEM -----------------------------
@@ -198,7 +215,7 @@ get_TEM <- function(aoi, out_dir) {
     }
 
   if (nrow(tem) > 0) {
-    st_write(tem, fs::path(out_dir, "tem.gpkg"), append = FALSE)
+    sf::st_write(tem, fs::path(out_dir, "tem.gpkg"), append = FALSE)
   }
 }
 
@@ -241,7 +258,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") %>%
     bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
     bcdata::select(id, ROAD_NAME_FULL, ROAD_CLASS, ROAD_SURFACE, FEATURE_LENGTH_M) %>%
-    collect() %>%
+    bcdata::collect() %>%
     dplyr::select(id, ROAD_NAME_FULL, ROAD_SURFACE, ROAD_CLASS, FEATURE_LENGTH_M) %>%
     {
       if (nrow(.) > 0) {
@@ -253,7 +270,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     }
 
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") %>%
-    bcdata::filter(BBOX(local(st_bbox(aoi)))) %>%
+    bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>%
     bcdata::collect() %>%
     dplyr::select(id, FILE_TYPE_DESCRIPTION, FEATURE_LENGTH_M) %>%
     dplyr::rename(ROAD_CLASS = FILE_TYPE_DESCRIPTION) %>%
@@ -267,8 +284,8 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     )) %>%
     {
       if (nrow(.) > 0) {
-        st_intersection(., aoi) %>%
-          st_cast("MULTILINESTRING")
+        sf::st_intersection(., aoi) %>%
+        sf::st_cast("MULTILINESTRING")
       } else {
         .
       }
@@ -344,7 +361,7 @@ get_fire_severity <- function(aoi, out_dir) {
   fire_int <- bcdata::bcdc_query_geodata("c58a54e5-76b7-4921-94a7-b5998484e697") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
     bcdata::select(c("FIRE_YEAR", "BURN_SEVERITY_RATING")) %>%
-    collect()
+    bcdata::collect()
 
   if (nrow(fire_int) > 0) {
     sf::st_write(fire_int, fs::path(out_dir, "fire_int.gpkg"), append = FALSE)
@@ -360,7 +377,7 @@ get_parks <- function(aoi, out_dir) {
   message("\rDownloading Parks")
 
   parks <- bcdata::bcdc_query_geodata("1130248f-f1a3-4956-8b2e-38d29d3e4af7") %>%
-    bcdata::filter(INTERSECTS(aoi)) %>%
+    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
     bcdata::collect() %>%
     {
       if (nrow(.) > 0) sf::st_intersection(., aoi) else .
@@ -373,7 +390,7 @@ get_parks <- function(aoi, out_dir) {
 
   # 12. National parks (if an option)
   national_parks <- bcdata::bcdc_query_geodata("88e61a14-19a0-46ab-bdae-f68401d3d0fb") %>%
-    bcdata::filter(INTERSECTS(aoi)) %>%
+    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
     bcdata::collect() %>%
     {
       if (nrow(.) > 0) sf::st_intersection(., aoi) else .
