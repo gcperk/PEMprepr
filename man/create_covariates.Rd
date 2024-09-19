@@ -27,6 +27,9 @@ exists they will NOT be overwritten.}
 \item call \code(\code{PEMprepr::layer_options}) for full list.
 }}
 }
+\value{
+TRUE
+}
 \description{
 #' Takes a dem and via SAGA GIS generates raster covariates at the resolution of
 the dem.
@@ -37,11 +40,11 @@ Depending on your system the path to \code{saga_cmd} may need to be specified.
 \examples{
 \dontrun{
 #  # start testing
-dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
- saga_path = "C:\\\\Programs\\\\saga-9.2.0_x64\\\\saga-9.2.0_x64"
- out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
- layers = "all"
- # end testing
+#dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
+#  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
+#  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+#  layers = "all"
+#  # end testing
 #--- load in dem and write to tempfile ---#
 aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
 aoi_raw <- sf::st_read(aoi_raw)
