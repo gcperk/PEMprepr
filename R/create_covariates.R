@@ -22,10 +22,10 @@
 #' \dontrun{
 #' #  # start testing
 #' #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-#'#  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
-#'#  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#'#  layers = "all"
-#'#  # end testing
+#' #  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
+#' #  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+#' #  layers = "all"
+#' #  # end testing
 #' #--- load in dem and write to tempfile ---#
 #' aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
 #' aoi_raw <- sf::st_read(aoi_raw)
