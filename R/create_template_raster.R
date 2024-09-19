@@ -33,7 +33,8 @@ create_template_raster <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_
                                    res = 25,
                                    filename = "template.tif",
                                    out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
-                                   write_output = TRUE) {
+                                   write_output = TRUE,
+                                   overwrite = TRUE) {
 
   if (!is.numeric(res)) {
     cli::cli_abort("{.var res} must be numeric")
@@ -70,7 +71,7 @@ create_template_raster <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_
       )
     }
 
-    terra::writeRaster(template, output_file, overwrite = FALSE)
+    terra::writeRaster(template, output_file, overwrite = overwrite)
     cli::cat_line()
     cli::cli_alert_success(
       "Template raster written to {.path {output_file}}"

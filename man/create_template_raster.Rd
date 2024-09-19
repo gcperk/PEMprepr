@@ -9,7 +9,8 @@ create_template_raster(
   res = 25,
   filename = "template.tif",
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
-  write_output = TRUE
+  write_output = TRUE,
+  overwrite = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ subfolder labelled with the resolution.}
 
 \item{write_output}{should the template raster be written to disk?
 If \code{TRUE} (default), will write to \code{out_dir}}
+
+\item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
 }
 \value{
 a terra raster
