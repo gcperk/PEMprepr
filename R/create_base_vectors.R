@@ -90,7 +90,7 @@ get_BEC <- function(aoi, out_dir) {
       if (nrow(.) > 0) sf::st_intersection(., aoi) else .
     }
 
-  if (sf::st_crs(aoi) == st_crs(bec)) {
+  if (sf::st_crs(aoi) == sf::st_crs(bec)) {
     sf::st_write(bec, fs::path(out_dir, "bec.gpkg"), append = FALSE)
   } else {
     # add conversion
