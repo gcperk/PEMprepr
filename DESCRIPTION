@@ -25,7 +25,8 @@ Imports:
     terra,
     bcdata,
     dplyr,
-    PEMr
+    PEMr,
+    magrittr
 Remotes:
     ninoxconsulting/PEMr
 Encoding: UTF-8
