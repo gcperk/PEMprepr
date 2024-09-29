@@ -89,9 +89,10 @@ get_BEC <- function(aoi, out_dir) {
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::select("MAP_LABEL") |>
     bcdata::collect() |>
-    dplyr::select("MAP_LABEL") %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
+    dplyr::select("MAP_LABEL")
+
+  if (nrow(bec) > 0) {
+      bec <- sf::st_intersection(bec, aoi)
     }
 
   if (sf::st_crs(aoi) == sf::st_crs(bec)) {
@@ -115,9 +116,10 @@ get_VRI <- function(aoi, out_dir) {
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1")) |> # Treed sites
     bcdata::collect() |>
-    dplyr::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1")) %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
+    dplyr::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1"))
+
+      if (nrow(vri) > 0){
+        vri <- sf::st_intersection(vri, aoi)
     }
 
   sf::st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
@@ -209,12 +211,10 @@ get_TEM <- function(aoi, out_dir) {
 
   tem <- bcdata::bcdc_query_geodata("0a83163b-a62f-4ce6-a9a1-21c228b0c0a3") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::collect() %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
-    }
+    bcdata::collect()
 
   if (nrow(tem) > 0) {
+    tem <- sf::st_intersection(tem, aoi)
     sf::st_write(tem, fs::path(out_dir, "tem.gpkg"), append = FALSE)
   }
 }
@@ -259,15 +259,13 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
     bcdata::select(id, ROAD_NAME_FULL, ROAD_CLASS, ROAD_SURFACE, FEATURE_LENGTH_M) %>%
     bcdata::collect() %>%
-    dplyr::select(id, ROAD_NAME_FULL, ROAD_SURFACE, ROAD_CLASS, FEATURE_LENGTH_M) %>%
-    {
-      if (nrow(.) > 0) {
-        sf::st_intersection(., aoi) %>%
+    dplyr::select(id, ROAD_NAME_FULL, ROAD_SURFACE, ROAD_CLASS, FEATURE_LENGTH_M)
+
+    if (nrow(roads) > 0) {
+        roads <- sf::st_intersection(roads, aoi) %>%
           sf::st_cast("MULTILINESTRING")
-      } else {
-        .
       }
-    }
+
 
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") %>%
     bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>%
@@ -281,17 +279,17 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     dplyr::mutate(ROAD_SURFACE = dplyr::case_when(
       ROAD_CLASS == "resource" ~ "loose",
       ROAD_CLASS == "unclassifed" ~ "rough"
-    )) %>%
-    {
-      if (nrow(.) > 0) {
-        sf::st_intersection(., aoi) %>%
-        sf::st_cast("MULTILINESTRING")
-      } else {
-        .
-      }
+    ))
+
+      if (nrow(fsr) > 0) {
+        fsr <- sf::st_intersection(fsr, aoi)
+          fsr <- sf::st_cast(fsr,"MULTILINESTRING")
     }
 
   road_merge <- dplyr::bind_rows(roads, fsr)
+
+  # might need a check here
+
   sf::st_write(road_merge, fs::path(out_dir, "road_network.gpkg"), append = FALSE)
 }
 
@@ -319,10 +317,8 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
   for (i in 1:length(fire_records)) {
     fires <- bcdata::bcdc_query_geodata(fire_records[i]) %>%
       bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-      bcdata::collect() %>%
-      {
-        if (nrow(.) > 0) sf::st_intersection(., aoi) else .
-      }
+      bcdata::collect()
+
     # filter for recent fires
     if (nrow(fires) > 0) {
       fires <- sf::st_intersection(fires, aoi) %>%
@@ -378,9 +374,10 @@ get_parks <- function(aoi, out_dir) {
 
   parks <- bcdata::bcdc_query_geodata("1130248f-f1a3-4956-8b2e-38d29d3e4af7") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::collect() %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
+    bcdata::collect()
+
+    if (nrow(parks) > 0) {
+      parks <- sf::st_intersection(parks, aoi)
     }
   if (nrow(parks) > 0) {
     sf::st_write(parks, fs::path(out_dir, "parks.gpkg"), append = FALSE)
@@ -391,9 +388,10 @@ get_parks <- function(aoi, out_dir) {
   # 12. National parks (if an option)
   national_parks <- bcdata::bcdc_query_geodata("88e61a14-19a0-46ab-bdae-f68401d3d0fb") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::collect() %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
+    bcdata::collect()
+
+      if (nrow(national_parks) > 0) {
+        national_parks <- sf::st_intersection(national_parks, aoi)
     }
   if (nrow(national_parks) > 0) {
     sf::st_write(national_parks, fs::path(out_dir, "natparks.gpkg"), append = FALSE)
@@ -409,9 +407,10 @@ get_transmission_lines <- function(aoi, out_dir) {
   # bcdc_search("transmission")
   trans_line <- bcdata::bcdc_query_geodata("384d551b-dee1-4df8-8148-b3fcf865096a") %>%
     bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::collect() %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
+    bcdata::collect()
+
+  if (nrow(  trans_line) > 0) {
+        trans_line <- sf::st_intersection(  trans_line, aoi)
     }
   if (nrow(trans_line) > 0) {
     sf::st_write(trans_line, fs::path(out_dir, "translines.gpkg"), append = FALSE)
