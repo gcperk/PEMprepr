@@ -12,8 +12,8 @@
 #' @param out_dir file.path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
-#' @param layers character vector. Covariates to be created. Default is \code(`all`)
-#'  - call \code(`PEMprepr::layer_options`) for full list.
+#' @param layers character vector. Covariates to be created. Default is `"all"`
+#'  - call `PEMprepr::layer_options` for full list.
 #'
 #' @return TRUE
 #' @export
