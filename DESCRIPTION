@@ -25,7 +25,9 @@ Imports:
     terra,
     bcdata,
     dplyr,
-    PEMr,
+purrr,
+stringr,
+bcmaps,
     magrittr
 Remotes:
     ninoxconsulting/PEMr
