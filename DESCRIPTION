@@ -25,9 +25,9 @@ Imports:
     terra,
     bcdata,
     dplyr,
-purrr,
-stringr,
-bcmaps,
+    purrr,
+    stringr,
+    bcmaps,
     magrittr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
