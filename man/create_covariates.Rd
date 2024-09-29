@@ -22,9 +22,9 @@ On linux systems with SAGA GIS installed Use \code{SAGApath = ""}}
 specified uses the default from the \code{fid} folder structure. If files already
 exists they will NOT be overwritten.}
 
-\item{layers}{character vector. Covariates to be created. Default is \code(\code{all})
+\item{layers}{character vector. Covariates to be created. Default is \code{"all"}
 \itemize{
-\item call \code(\code{PEMprepr::layer_options}) for full list.
+\item call \code{PEMprepr::layer_options} for full list.
 }}
 }
 \value{
