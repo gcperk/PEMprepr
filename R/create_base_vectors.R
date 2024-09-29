@@ -135,14 +135,14 @@ get_VRI <- function(aoi, out_dir) {
   # class 1-3 (0 - 60 years)
 
   vri_class2 <- vri |>
-    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter(age_class < 3)
+    dplyr::mutate("age_class" = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
+    dplyr::filter("age_class" < 3)
 
   sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
 
   vri_class3 <- vri |>
-    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter(age_class == 3)
+    dplyr::mutate("age_class" = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
+    dplyr::filter("age_class" == 3)
 
   sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
 
@@ -155,7 +155,7 @@ get_VRI <- function(aoi, out_dir) {
   # # ie important in Date Creek
   #
   vri_decid <- vri |>
-    dplyr::filter(SPECIES_CD_1 %in% c("AT", "EP")) # note might need to adjust for some areas of interest
+    dplyr::filter("SPECIES_CD_1" %in% c("AT", "EP")) # note might need to adjust for some areas of interest
   sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
 }
 
@@ -170,11 +170,11 @@ get_harvest <- function(aoi, out_dir) {
     bcdata::select(c("HARVEST_YEAR", "AREA_HA")) |>
     bcdata::collect()
 
-  cutblocks <- cutblocks %>%
-    {
-      if (nrow(.) > 0) sf::st_intersection(., aoi) else .
-    } %>%
-    dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - HARVEST_YEAR <= 20)
+    if (nrow(cutblocks) > 0){
+        cutblocks <- sf::st_intersection(cutblocks, aoi)
+        cutblocks <- cutblocks %>%
+          dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "HARVEST_YEAR" <= 20)
+    }
 
   sf::st_write(cutblocks, fs::path(out_dir, "cutblocks.gpkg"), append = FALSE)
 
@@ -189,7 +189,7 @@ get_harvest <- function(aoi, out_dir) {
       "HARVEST_AUTH_STATUS_CODE", "ISSUE_DATE", "CURRENT_EXPIRY_DATE_CALC",
       "LIFE_CYCLE_STATUS_CODE", "FILE_STATUS_CODE"
     ) |>
-    dplyr::filter(ISSUE_DATE > 2000) # might need to adjust this to dynamic
+    dplyr::filter("ISSUE_DATE" > 2000) # might need to adjust this to dynamic
 
   sf::st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
 
@@ -268,7 +268,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
 
 
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") %>%
-    bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>%
+    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) %>%
     bcdata::collect() %>%
     dplyr::select("id", "FILE_TYPE_DESCRIPTION", "FEATURE_LENGTH_M") %>%
     dplyr::rename(ROAD_CLASS = FILE_TYPE_DESCRIPTION) %>%
