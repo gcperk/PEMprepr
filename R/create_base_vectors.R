@@ -135,13 +135,13 @@ get_VRI <- function(aoi, out_dir) {
   # class 1-3 (0 - 60 years)
 
   vri_class2 <- vri |>
-    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) |>
+    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
     dplyr::filter(age_class < 3)
 
   sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
 
   vri_class3 <- vri |>
-    dplyr::mutate(age_class = as.numeric(PROJ_AGE_CLASS_CD_1)) |>
+    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
     dplyr::filter(age_class == 3)
 
   sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
@@ -233,7 +233,7 @@ get_water <- function(aoi, out_dir) {
     waterbodies <- bcdata::bcdc_query_geodata(water_records[i]) %>%
       bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
       bcdata::collect() %>%
-      dplyr::select(id, WATERBODY_TYPE, AREA_HA)
+      dplyr::select("id", "WATERBODY_TYPE", "AREA_HA")
 
     if (nrow(waterbodies) > 0) {
       waterbodies <- sf::st_intersection(waterbodies, aoi)
@@ -257,9 +257,9 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   message("\rDownloading Road network")
   roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") %>%
     bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
-    bcdata::select(id, ROAD_NAME_FULL, ROAD_CLASS, ROAD_SURFACE, FEATURE_LENGTH_M) %>%
+    bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") %>%
     bcdata::collect() %>%
-    dplyr::select(id, ROAD_NAME_FULL, ROAD_SURFACE, ROAD_CLASS, FEATURE_LENGTH_M)
+    dplyr::select("id", "ROAD_NAME_FULL", "ROAD_SURFACE", "ROAD_CLASS", "FEATURE_LENGTH_M")
 
     if (nrow(roads) > 0) {
         roads <- sf::st_intersection(roads, aoi) %>%
@@ -270,7 +270,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") %>%
     bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>%
     bcdata::collect() %>%
-    dplyr::select(id, FILE_TYPE_DESCRIPTION, FEATURE_LENGTH_M) %>%
+    dplyr::select("id", "FILE_TYPE_DESCRIPTION", "FEATURE_LENGTH_M") %>%
     dplyr::rename(ROAD_CLASS = FILE_TYPE_DESCRIPTION) %>%
     dplyr::mutate(ROAD_CLASS = dplyr::case_when(
       ROAD_CLASS == "Forest Service Road" ~ "resource",
@@ -323,10 +323,10 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
     if (nrow(fires) > 0) {
       fires <- sf::st_intersection(fires, aoi) %>%
         dplyr::select(
-          id, FIRE_NUMBER, VERSION_NUMBER, FIRE_YEAR,
-          FIRE_SIZE_HECTARES, LOAD_DATE
+          "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
+          "FIRE_SIZE_HECTARES", "LOAD_DATE"
         ) %>%
-        dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - FIRE_YEAR <= 20)
+        dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "FIRE_YEAR" <= 20)
     }
     if (nrow(fires) > 0) {
       ## bind results of loops
@@ -410,7 +410,7 @@ get_transmission_lines <- function(aoi, out_dir) {
     bcdata::collect()
 
   if (nrow(  trans_line) > 0) {
-        trans_line <- sf::st_intersection(  trans_line, aoi)
+        trans_line <- sf::st_intersection(trans_line, aoi)
     }
   if (nrow(trans_line) > 0) {
     sf::st_write(trans_line, fs::path(out_dir, "translines.gpkg"), append = FALSE)
