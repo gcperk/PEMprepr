@@ -42,7 +42,7 @@ recursive_layers_call <- function(layers, moddir = moddir, artifact = artifacts)
   #--- which modules are being called ---#
 
   moddirs <- moddir |>
-    dplyr::filter(module %in% layers)
+    dplyr::filter("module" %in% layers)
 
   mods <- moddirs$module
 
@@ -63,7 +63,7 @@ recursive_layers_call <- function(layers, moddir = moddir, artifact = artifacts)
     v1 <- v1[v1 != ""]
 
     moddirs <- moddir |>
-      dplyr::filter(module %in% v1)
+      dplyr::filter("module" %in% v1)
 
     mods <- c(mods,moddirs$module)
   }
@@ -79,7 +79,7 @@ recursive_layers_call <- function(layers, moddir = moddir, artifact = artifacts)
 
     artifactdirs <- artifact  |>
       dplyr::filter(artifacts == TRUE) |>
-      dplyr::select(metric)
+      dplyr::select("metric")
 
     artifact_layers <- layers_to_call[layers_to_call %in% artifactdirs$metric]
 
@@ -106,8 +106,8 @@ recursive_layers_call <- function(layers, moddir = moddir, artifact = artifacts)
 read_crop <- function(f, poly, tmp){
 
   #--- extract tile index to match with index in polygons - works up to 1000 tiles ---#
-  index <- stringr::str_extract(f, pattern = "_([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)_") %>%
-    stringr::str_replace_all(., pattern = "_", replacement = "") %>%
+  index <- stringr::str_extract(f, pattern = "_([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)_")
+  index <- stringr::str_replace_all(index, pattern = "_", replacement = "") %>%
     as.numeric()
 
   #--- write rasters to tmp folder ---#

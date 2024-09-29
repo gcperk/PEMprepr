@@ -256,7 +256,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   # include named roads and combine those with actual mapped FSR's
   message("\rDownloading Road network")
   roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") %>%
-    bcdata::filter(BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
+    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
     bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") %>%
     bcdata::collect() %>%
     dplyr::select("id", "ROAD_NAME_FULL", "ROAD_SURFACE", "ROAD_CLASS", "FEATURE_LENGTH_M")
@@ -271,7 +271,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) %>%
     bcdata::collect() %>%
     dplyr::select("id", "FILE_TYPE_DESCRIPTION", "FEATURE_LENGTH_M") %>%
-    dplyr::rename(ROAD_CLASS = FILE_TYPE_DESCRIPTION) %>%
+    dplyr::rename(ROAD_CLASS = "FILE_TYPE_DESCRIPTION") %>%
     dplyr::mutate(ROAD_CLASS = dplyr::case_when(
       ROAD_CLASS == "Forest Service Road" ~ "resource",
       ROAD_CLASS == "Road Permit" ~ "unclassifed"
