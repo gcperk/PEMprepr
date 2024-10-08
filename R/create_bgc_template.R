@@ -21,13 +21,14 @@
 #
 #   if(class(bec_sf) =="character"){
 #
-#     bec_sf <- sf::st_read(file.path(fid$shape_dir_1010[2], "bec.gpkg")) %>%   sf::st_cast(., "MULTIPOLYGON")
+#     bec_sf <- sf::st_read(file.path(fid$shape_dir_1010[2], "bec.gpkg")) |>
+#        sf::st_cast("MULTIPOLYGON")
 #
 #   }
-#   bec_code <- bec_sf %>% sf::st_drop_geometry()  %>% dplyr::select(any_of(field)) %>%
+#   bec_code <- bec_sf |> sf::st_drop_geometry()  |> dplyr::select(any_of(field)) |>
 #     unique()
 #
-#   bec_code <- bec_code %>%
+#   bec_code <- bec_code |>
 #     dplyr::mutate(bgc_unique_code = seq(1, length(bec_code[,1]),1))
 #
 #   bec_sf <- dplyr::left_join(bec_sf, bec_code)

@@ -40,7 +40,7 @@ create_base_vectors <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vec
     cat("Input CRS is Lat/Long format. Transforming to EPSG 3005 (BC Albers) for processing\n")
     epsg <- 3005L
     in_crs <- sf::st_crs(aoi)
-    aoi <- sf::st_transform(aoi, epsg) %>% sf::st_set_agr("constant")
+    aoi <- sf::st_transform(aoi, epsg) |> sf::st_set_agr("constant")
   } else {
     in_crs <- sf::st_crs(aoi)
     epsg <- in_crs$epsg
@@ -172,7 +172,7 @@ get_harvest <- function(aoi, out_dir) {
 
     if (nrow(cutblocks) > 0){
         cutblocks <- sf::st_intersection(cutblocks, aoi)
-        cutblocks <- cutblocks %>%
+        cutblocks <- cutblocks |>
           dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "HARVEST_YEAR" <= 20)
     }
 
@@ -181,8 +181,8 @@ get_harvest <- function(aoi, out_dir) {
   # 4) ften  - Download latest harvest layer
   #message("\rDownloading ften harvest layers")
 
-  ften <- bcdata::bcdc_query_geodata("cff7b8f7-6897-444f-8c53-4bb93c7e9f8b") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+  ften <- bcdata::bcdc_query_geodata("cff7b8f7-6897-444f-8c53-4bb93c7e9f8b") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::select("HARVEST_AUTH_STATUS_CODE", "ISSUE_DATE", "CURRENT_EXPIRY_DATE_CALC", "LIFE_CYCLE_STATUS_CODE", "FILE_STATUS_CODE") |>
     bcdata::collect() |>
     dplyr::select(
@@ -209,8 +209,8 @@ get_harvest <- function(aoi, out_dir) {
 get_TEM <- function(aoi, out_dir) {
   message("\rDownloading TEM layers")
 
-  tem <- bcdata::bcdc_query_geodata("0a83163b-a62f-4ce6-a9a1-21c228b0c0a3") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+  tem <- bcdata::bcdc_query_geodata("0a83163b-a62f-4ce6-a9a1-21c228b0c0a3") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
   if (nrow(tem) > 0) {
@@ -230,15 +230,15 @@ get_water <- function(aoi, out_dir) {
     "93b413d8-1840-4770-9629-641d74bd1cc6"
   ) # wetlands
   for (i in 1:length(water_records)) {
-    waterbodies <- bcdata::bcdc_query_geodata(water_records[i]) %>%
-      bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-      bcdata::collect() %>%
+    waterbodies <- bcdata::bcdc_query_geodata(water_records[i]) |>
+      bcdata::filter(bcdata::INTERSECTS(aoi)) |>
+      bcdata::collect() |>
       dplyr::select("id", "WATERBODY_TYPE", "AREA_HA")
 
     if (nrow(waterbodies) > 0) {
       waterbodies <- sf::st_intersection(waterbodies, aoi)
 
-      waterbodies_sf <- waterbodies # %>%
+      waterbodies_sf <- waterbodies # |>
       #  dplyr::select(id, WATERBODY_TYPE, AREA_HA)
       if (i == 1) {
         all_water <- waterbodies_sf
@@ -255,27 +255,27 @@ get_water <- function(aoi, out_dir) {
 get_roads <- function(aoi, out_dir) { #  # The main road network layer has too many roads in it. Filter it down to only
   # include named roads and combine those with actual mapped FSR's
   message("\rDownloading Road network")
-  roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") %>%
-    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) %>% # slightly larger extent
-    bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") %>%
-    bcdata::collect() %>%
+  roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") |>
+    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |> # slightly larger extent
+    bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") |>
+    bcdata::collect() |>
     dplyr::select("id", "ROAD_NAME_FULL", "ROAD_SURFACE", "ROAD_CLASS", "FEATURE_LENGTH_M")
 
     if (nrow(roads) > 0) {
-        roads <- sf::st_intersection(roads, aoi) %>%
+        roads <- sf::st_intersection(roads, aoi) |>
           sf::st_cast("MULTILINESTRING")
       }
 
 
-  fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") %>%
-    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) %>%
-    bcdata::collect() %>%
-    dplyr::select("id", "FILE_TYPE_DESCRIPTION", "FEATURE_LENGTH_M") %>%
-    dplyr::rename(ROAD_CLASS = "FILE_TYPE_DESCRIPTION") %>%
+  fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") |>
+    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |>
+    bcdata::collect() |>
+    dplyr::select("id", "FILE_TYPE_DESCRIPTION", "FEATURE_LENGTH_M") |>
+    dplyr::rename(ROAD_CLASS = "FILE_TYPE_DESCRIPTION") |>
     dplyr::mutate(ROAD_CLASS = dplyr::case_when(
       ROAD_CLASS == "Forest Service Road" ~ "resource",
       ROAD_CLASS == "Road Permit" ~ "unclassifed"
-    )) %>%
+    )) |>
     dplyr::mutate(ROAD_SURFACE = dplyr::case_when(
       ROAD_CLASS == "resource" ~ "loose",
       ROAD_CLASS == "unclassifed" ~ "rough"
@@ -297,7 +297,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
 get_towns <- function(aoi, out_dir) {
   message("\rDownloading major towns")
 
-  towns <- bcdata::bcdc_query_geodata("b678c432-c5c1-4341-88db-0d6befa0c7f8") %>%
+  towns <- bcdata::bcdc_query_geodata("b678c432-c5c1-4341-88db-0d6befa0c7f8") |>
     bcdata::collect()
 
   sf::st_write(towns, fs::path(out_dir, "major_towns_bc.gpkg"), append = FALSE)
@@ -315,17 +315,17 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
   fires_all <- NA ## placeholder
 
   for (i in 1:length(fire_records)) {
-    fires <- bcdata::bcdc_query_geodata(fire_records[i]) %>%
-      bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+    fires <- bcdata::bcdc_query_geodata(fire_records[i]) |>
+      bcdata::filter(bcdata::INTERSECTS(aoi)) |>
       bcdata::collect()
 
     # filter for recent fires
     if (nrow(fires) > 0) {
-      fires <- sf::st_intersection(fires, aoi) %>%
+      fires <- sf::st_intersection(fires, aoi) |>
         dplyr::select(
           "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
           "FIRE_SIZE_HECTARES", "LOAD_DATE"
-        ) %>%
+        ) |>
         dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "FIRE_YEAR" <= 20)
     }
     if (nrow(fires) > 0) {
@@ -354,9 +354,9 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
 get_fire_severity <- function(aoi, out_dir) {
   message("\rDownloading burn severity layer")
 
-  fire_int <- bcdata::bcdc_query_geodata("c58a54e5-76b7-4921-94a7-b5998484e697") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
-    bcdata::select(c("FIRE_YEAR", "BURN_SEVERITY_RATING")) %>%
+  fire_int <- bcdata::bcdc_query_geodata("c58a54e5-76b7-4921-94a7-b5998484e697") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
+    bcdata::select(c("FIRE_YEAR", "BURN_SEVERITY_RATING")) |>
     bcdata::collect()
 
   if (nrow(fire_int) > 0) {
@@ -372,8 +372,8 @@ get_fire_severity <- function(aoi, out_dir) {
 get_parks <- function(aoi, out_dir) {
   message("\rDownloading Parks")
 
-  parks <- bcdata::bcdc_query_geodata("1130248f-f1a3-4956-8b2e-38d29d3e4af7") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+  parks <- bcdata::bcdc_query_geodata("1130248f-f1a3-4956-8b2e-38d29d3e4af7") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
     if (nrow(parks) > 0) {
@@ -386,8 +386,8 @@ get_parks <- function(aoi, out_dir) {
   }
 
   # 12. National parks (if an option)
-  national_parks <- bcdata::bcdc_query_geodata("88e61a14-19a0-46ab-bdae-f68401d3d0fb") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+  national_parks <- bcdata::bcdc_query_geodata("88e61a14-19a0-46ab-bdae-f68401d3d0fb") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
       if (nrow(national_parks) > 0) {
@@ -405,8 +405,8 @@ get_transmission_lines <- function(aoi, out_dir) {
   message("\rDownloading transmission lines")
 
   # bcdc_search("transmission")
-  trans_line <- bcdata::bcdc_query_geodata("384d551b-dee1-4df8-8148-b3fcf865096a") %>%
-    bcdata::filter(bcdata::INTERSECTS(aoi)) %>%
+  trans_line <- bcdata::bcdc_query_geodata("384d551b-dee1-4df8-8148-b3fcf865096a") |>
+    bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
   if (nrow(  trans_line) > 0) {
