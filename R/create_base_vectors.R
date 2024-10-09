@@ -14,43 +14,54 @@
 #' #' ## Load snapped aoi object
 #' aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 #' sn_aoi <- snap_aoi(aoi_file, write_output = FALSE)
-#' create_base_vectors(sn_aoi, out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs)
+#' create_base_vectors(
+#'   sn_aoi,
+#'   out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs
+#' )
 #'}
-create_base_vectors <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
-                                out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs) {
-  # # testing
-  # aoi <- fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg")
-  #  aoi <- sf::st_read(aoi, quiet = TRUE)
-  #  out_dir <- PEMprepr::read_fid()$dir_1010_vector$path_abs
-
-  if (missing(aoi)) stop("'aoi' is missing with no default")
-
-  # Second, detect object type and convert where necessary
-  if (!inherits(aoi, c("sf", "sfc"))) {
-    stop("'aoi' is not an sf or sfc object.")
-  }
+create_base_vectors <- function(
+    aoi = fs::path(
+      PEMprepr::read_fid()$dir_1010_vector$path_abs,
+      "aoi_snapped.gpkg"
+    ),
+    out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs
+) {
   if (is.null(out_dir)) {
-    stop("\rout_dir is an invalid file path string")
+    cli::cli_abort("out_dir is an invalid file path string")
   }
+
+  UseMethod("create_base_vectors")
+}
+
+#' @export
+create_base_vectors.default <- function(aoi, out_dir) {
+  cli::cli_abort("No method for object of class {class(aoi)}")
+}
+
+#' @export
+create_base_vectors.character <- function(aoi, out_dir) {
+  aoi_sf <- sf::st_read(aoi)
+  create_base_vectors(aoi_sf, out_dir)
+}
+
+#' @export
+create_base_vectors.sf <- function(aoi, out_dir) {
+
   # Detect the CRS of the sf object
   if (is.na(sf::st_crs(aoi))) {
-    stop("CRS is not assigned. Use sf::st_crs() to assign a valid CRS to aoi")
-  }
-  if (sf::st_is_longlat(aoi)) {
-    cat("Input CRS is Lat/Long format. Transforming to EPSG 3005 (BC Albers) for processing\n")
-    epsg <- 3005L
-    in_crs <- sf::st_crs(aoi)
-    aoi <- sf::st_transform(aoi, epsg) |> sf::st_set_agr("constant")
-  } else {
-    in_crs <- sf::st_crs(aoi)
-    epsg <- in_crs$epsg
-    aoi <- sf::st_set_agr(aoi, "constant")
-    if (!is.numeric(epsg)) {
-      stop("There was a problem retrieving the EPSG code from the aoi. Is it assigned properly?")
-    }
+    cli::cli_abort("CRS is not assigned. Use sf::st_crs() to assign a valid CRS to aoi")
   }
 
-  epsg <- sf::st_crs(aoi)
+  if (sf::st_is_longlat(aoi)) {
+    cli::cli_alert_info("Input CRS is Lat/Long format. Transforming to EPSG 3005 (BC Albers) for processing")
+    aoi <- bcmaps::transform_bc_albers(aoi)
+  }
+
+  aoi <- sf::st_set_agr(aoi, "constant")
+
+  if (!is.numeric(sf::st_crs(aoi)$epsg)) {
+    cli::cli_abort("There was a problem retrieving the EPSG code from the aoi. Is it assigned properly?")
+  }
 
   # note this was an earlier flag - I dont like the idea of changing internals
   # @Andy T. any thoughts on speed improvements.
@@ -79,6 +90,9 @@ create_base_vectors <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vec
     "Layers downloaded and to written to {.path {out_dir}}"
   )
 }
+
+#' @export
+ create_base_vectors.sfc <- create_base_vectors.sf
 
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
