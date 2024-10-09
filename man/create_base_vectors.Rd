@@ -10,7 +10,8 @@ create_base_vectors(
 )
 }
 \arguments{
-\item{aoi}{An  \code{sf} object (e.g. polygon), which has been snapped to a common extend.
+\item{aoi}{An \code{sf} object (e.g. polygon) or path to a spatial file,
+which has been snapped to a common extend.
 This is commonly the output of the snap_aoi() function. A default location and name are
 applied in line with standard workflow.}
 
