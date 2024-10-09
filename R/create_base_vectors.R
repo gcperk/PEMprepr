@@ -1,6 +1,7 @@
 #' Generates base information vectors for sample planning and modelling using bcdata package
 #'
-#' @param aoi An  `sf` object (e.g. polygon), which has been snapped to a common extend.
+#' @param aoi An `sf` object (e.g. polygon) or path to a spatial file,
+#'    which has been snapped to a common extend.
 #'    This is commonly the output of the snap_aoi() function. A default location and name are
 #'    applied in line with standard workflow.
 #' @param out_dir A character string of filepath which points to output location. A default
@@ -27,7 +28,7 @@ create_base_vectors <- function(
     out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs
 ) {
   if (is.null(out_dir)) {
-    cli::cli_abort("out_dir is an invalid file path string")
+    cli::cli_abort("{.var out_dir} is an invalid file path string")
   }
 
   UseMethod("create_base_vectors")
@@ -35,7 +36,7 @@ create_base_vectors <- function(
 
 #' @export
 create_base_vectors.default <- function(aoi, out_dir) {
-  cli::cli_abort("No method for object of class {class(aoi)}")
+  cli::cli_abort("No method for object of class {.var {class(aoi)}}")
 }
 
 #' @export
@@ -89,6 +90,7 @@ create_base_vectors.sf <- function(aoi, out_dir) {
   cli::cli_alert_success(
     "Layers downloaded and to written to {.path {out_dir}}"
   )
+  invisible(out_dir)
 }
 
 #' @export
@@ -96,7 +98,7 @@ create_base_vectors.sf <- function(aoi, out_dir) {
 
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
-  #message("\rDownloading BEC layers")
+  cli::cli_alert_info("Downloading BEC layers")
 
   # # 1) BEC Biogeographical linework
   bec <- bcdata::bcdc_query_geodata("f358a53b-ffde-4830-a325-a5a03ff672c3") |>
@@ -124,7 +126,7 @@ get_BEC <- function(aoi, out_dir) {
 
 ### 2) Download VRI -----------------------
 get_VRI <- function(aoi, out_dir) {
-  message("\rDownloading VRI layers")
+  cli::cli_alert_info("Downloading VRI layers")
 
   vri <- bcdata::bcdc_query_geodata("2ebb35d8-c82f-4a17-9c96-612ac3532d55") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -149,14 +151,14 @@ get_VRI <- function(aoi, out_dir) {
   # class 1-3 (0 - 60 years)
 
   vri_class2 <- vri |>
-    dplyr::mutate("age_class" = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter("age_class" < 3)
+    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
+    dplyr::filter(.data$age_class < 3)
 
   sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
 
   vri_class3 <- vri |>
-    dplyr::mutate("age_class" = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter("age_class" == 3)
+    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
+    dplyr::filter(.data$age_class == 3)
 
   sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
 
@@ -169,7 +171,7 @@ get_VRI <- function(aoi, out_dir) {
   # # ie important in Date Creek
   #
   vri_decid <- vri |>
-    dplyr::filter("SPECIES_CD_1" %in% c("AT", "EP")) # note might need to adjust for some areas of interest
+    dplyr::filter(.data$SPECIES_CD_1 %in% c("AT", "EP")) # note might need to adjust for some areas of interest
   sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
 }
 
@@ -177,23 +179,23 @@ get_VRI <- function(aoi, out_dir) {
 ### 3) Get harvest history and FTEN --------------------------------
 get_harvest <- function(aoi, out_dir) {
   # 3) Download recent cutblocks (within last 20 years)
-  #message("\rDownloading cutblock layers")
   # Uses date filter which filters cutblock ages less than 20 years, or 7305 days
+
+  cli::cli_alert_info("Downloading cutblock layers")
   cutblocks <- bcdata::bcdc_query_geodata("b1b647a6-f271-42e0-9cd0-89ec24bce9f7") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
-    bcdata::select(c("HARVEST_YEAR", "AREA_HA")) |>
+    bcdata::select("HARVEST_YEAR", "AREA_HA") |>
     bcdata::collect()
 
-    if (nrow(cutblocks) > 0){
-        cutblocks <- sf::st_intersection(cutblocks, aoi)
-        cutblocks <- cutblocks |>
-          dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "HARVEST_YEAR" <= 20)
-    }
+  if (nrow(cutblocks) > 0) {
+    cutblocks <- sf::st_intersection(cutblocks, aoi) |>
+      dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - .data$HARVEST_YEAR <= 20)
+  }
 
   sf::st_write(cutblocks, fs::path(out_dir, "cutblocks.gpkg"), append = FALSE)
 
   # 4) ften  - Download latest harvest layer
-  #message("\rDownloading ften harvest layers")
+  cli::cli_alert_info("Downloading ften harvest layers")
 
   ften <- bcdata::bcdc_query_geodata("cff7b8f7-6897-444f-8c53-4bb93c7e9f8b") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -203,10 +205,11 @@ get_harvest <- function(aoi, out_dir) {
       "HARVEST_AUTH_STATUS_CODE", "ISSUE_DATE", "CURRENT_EXPIRY_DATE_CALC",
       "LIFE_CYCLE_STATUS_CODE", "FILE_STATUS_CODE"
     ) |>
-    dplyr::filter("ISSUE_DATE" > 2000) # might need to adjust this to dynamic
+    dplyr::filter(
+      as.numeric(format(.data$ISSUE_DATE, "%Y")) > 2000
+    ) # might need to adjust this to dynamic
 
   sf::st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
-
 
   cutblocks_ften <- dplyr::bind_rows(cutblocks, ften)
 
@@ -216,12 +219,11 @@ get_harvest <- function(aoi, out_dir) {
   cli::cli_alert_success(
     "harvest layers downloaded and to written to {.path {out_dir}}"
   )
-
 }
 
 ### 5) TEM -----------------------------
 get_TEM <- function(aoi, out_dir) {
-  message("\rDownloading TEM layers")
+  cli::cli_alert_info("Downloading TEM layers")
 
   tem <- bcdata::bcdc_query_geodata("0a83163b-a62f-4ce6-a9a1-21c228b0c0a3") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -236,7 +238,7 @@ get_TEM <- function(aoi, out_dir) {
 
 ### 6) Water (Lakes, Rivers, Wetlands) --------------------------------------
 get_water <- function(aoi, out_dir) {
-  message("\rDownloading lake, river, and wetland layers")
+  cli::cli_alert_info("Downloading lake, river, and wetland layers")
 
   water_records <- c(
     "cb1e3aba-d3fe-4de1-a2d4-b8b6650fb1f6", # lakes
@@ -268,7 +270,7 @@ get_water <- function(aoi, out_dir) {
 ## 7) Download road network --------------------
 get_roads <- function(aoi, out_dir) { #  # The main road network layer has too many roads in it. Filter it down to only
   # include named roads and combine those with actual mapped FSR's
-  message("\rDownloading Road network")
+  cli::cli_alert_info("Downloading Road network")
   roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") |>
     bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |> # slightly larger extent
     bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") |>
@@ -309,7 +311,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
 
 ## 8 Major Towns ---------------------------------
 get_towns <- function(aoi, out_dir) {
-  message("\rDownloading major towns")
+  cli::cli_alert_info("Downloading major towns")
 
   towns <- bcdata::bcdc_query_geodata("b678c432-c5c1-4341-88db-0d6befa0c7f8") |>
     bcdata::collect()
@@ -319,7 +321,7 @@ get_towns <- function(aoi, out_dir) {
 
 
 ## 9) Fire polygons  ---------------------------------
-get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire disturbance (<20 years)")
+get_fires <- function(aoi, out_dir) { #  cli::cli_alert_info("Downloading recent fire disturbance (<20 years)")
 
   fire_records <- c(
     "cdfc2d7b-c046-4bf0-90ac-4897232619e1",
@@ -340,7 +342,7 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
           "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
           "FIRE_SIZE_HECTARES", "LOAD_DATE"
         ) |>
-        dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - "FIRE_YEAR" <= 20)
+        dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - .data$FIRE_YEAR <= 20)
     }
     if (nrow(fires) > 0) {
       ## bind results of loops
@@ -357,7 +359,7 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
   }
 
   if (all(is.na(fires_all)) || nrow(fires_all) == 0) {
-    print("No recent fire disturbance in area of interest")
+    cli::cli_alert_warning("No recent fire disturbance in area of interest")
   } else {
     sf::st_write(fires_all, fs::path(out_dir, "fire.gpkg"), append = FALSE)
   }
@@ -366,7 +368,7 @@ get_fires <- function(aoi, out_dir) { #  message("\rDownloading recent fire dist
 
 ## 10. fire severity -------------------------------------
 get_fire_severity <- function(aoi, out_dir) {
-  message("\rDownloading burn severity layer")
+  cli::cli_alert_info("Downloading burn severity layer")
 
   fire_int <- bcdata::bcdc_query_geodata("c58a54e5-76b7-4921-94a7-b5998484e697") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -376,7 +378,7 @@ get_fire_severity <- function(aoi, out_dir) {
   if (nrow(fire_int) > 0) {
     sf::st_write(fire_int, fs::path(out_dir, "fire_int.gpkg"), append = FALSE)
   } else {
-    print("No burn severity in AOI")
+    cli::cli_alert_warning("No burn severity in AOI")
   }
 }
 
@@ -384,7 +386,7 @@ get_fire_severity <- function(aoi, out_dir) {
 ## 11) BC parks and National parks-----------------
 
 get_parks <- function(aoi, out_dir) {
-  message("\rDownloading Parks")
+  cli::cli_alert_info("Downloading Parks")
 
   parks <- bcdata::bcdc_query_geodata("1130248f-f1a3-4956-8b2e-38d29d3e4af7") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -396,7 +398,7 @@ get_parks <- function(aoi, out_dir) {
   if (nrow(parks) > 0) {
     sf::st_write(parks, fs::path(out_dir, "parks.gpkg"), append = FALSE)
   } else {
-    print("no provincial parks in aoi")
+    cli::cli_alert_warning("no provincial parks in aoi")
   }
 
   # 12. National parks (if an option)
@@ -410,13 +412,13 @@ get_parks <- function(aoi, out_dir) {
   if (nrow(national_parks) > 0) {
     sf::st_write(national_parks, fs::path(out_dir, "natparks.gpkg"), append = FALSE)
   } else {
-    print("no national parks in aoi")
+    cli::cli_alert_warning("no national parks in aoi")
   }
 }
 
 ## 13) transmission lines -------------------------------
 get_transmission_lines <- function(aoi, out_dir) {
-  message("\rDownloading transmission lines")
+  cli::cli_alert_info("Downloading transmission lines")
 
   # bcdc_search("transmission")
   trans_line <- bcdata::bcdc_query_geodata("384d551b-dee1-4df8-8148-b3fcf865096a") |>
@@ -429,6 +431,6 @@ get_transmission_lines <- function(aoi, out_dir) {
   if (nrow(trans_line) > 0) {
     sf::st_write(trans_line, fs::path(out_dir, "translines.gpkg"), append = FALSE)
   } else {
-    print("No transmission lines in area of interest")
+    cli::cli_alert_warning("No transmission lines in area of interest")
   }
 }
