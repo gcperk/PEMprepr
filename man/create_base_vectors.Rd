@@ -19,7 +19,7 @@ applied in line with standard workflow.}
 location and name are applied in line with standard workflow.}
 }
 \value{
-multiple gpkg files written directly to out_put directory
+path to the output directory where files are written (invisibly).
 }
 \description{
 Generates base information vectors for sample planning and modelling using bcdata package

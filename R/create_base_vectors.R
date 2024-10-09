@@ -7,7 +7,7 @@
 #' @param out_dir A character string of filepath which points to output location. A default
 #'    location and name are applied in line with standard workflow.
 #'
-#' @return multiple gpkg files written directly to out_put directory
+#' @return path to the output directory where files are written (invisibly).
 #' @export
 #'
 #' @examples
