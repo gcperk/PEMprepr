@@ -47,10 +47,11 @@ Having the aoi set 100m break-points facilitates this.
 \examples{
 \dontrun{
 create_template_raster(
-    aoi = fs::path(PEMr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
-    res = 25,
-    filename = "template.tif",
-    out_dir = PEMr::read_fid()$dir_1020_covariates$path_rel,
-    write_output = TRUE)
+  aoi = fs::path(PEMr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
+  res = 25,
+  filename = "template.tif",
+  out_dir = PEMr::read_fid()$dir_1020_covariates$path_rel,
+  write_output = TRUE
+)
 }
 }
