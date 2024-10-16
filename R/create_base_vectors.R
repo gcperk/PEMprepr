@@ -245,15 +245,17 @@ get_water <- function(aoi, out_dir) {
   )
 
   get_one_water <- function(id) {
-    bcdata::bcdc_query_geodata(id) |>
+    water <- bcdata::bcdc_query_geodata(id) |>
       bcdata::filter(bcdata::INTERSECTS(aoi)) |>
-      bcdata::collect() |>
-      dplyr::select("id", "WATERBODY_TYPE", "AREA_HA")
+      bcdata::collect()
+
+    if (nrow(water) > 0) {
+      water <- dplyr::select(water, "id", "WATERBODY_TYPE", "AREA_HA")
+    }
+    water
   }
 
-  water_list <- purrr::map(water_records, get_one_water)
-
-  all_water <- dplyr::bind_rows(water_list)
+all_water <- get_multi_datasets(ids = water_records, fun = get_one_water)
 
   sf::st_write(all_water, fs::path(out_dir, "water.gpkg"), append = FALSE)
 }
@@ -322,21 +324,21 @@ get_fires <- function(aoi, out_dir) { #  cli::cli_alert_info("Downloading recent
   get_one_fire <- function(id) {
     fires <- bcdata::bcdc_query_geodata(id) |>
       bcdata::filter(bcdata::INTERSECTS(aoi)) |>
-      bcdata::collect() |>
-      dplyr::select(
-        "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
-        "FIRE_SIZE_HECTARES", "LOAD_DATE"
-      )
-    # filter for recent fires
+      bcdata::collect()
     if (nrow(fires) > 0) {
-      fires <- sf::st_intersection(fires, aoi) |>
+      fires <- fires |>
+        dplyr::select(
+          "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
+          "FIRE_SIZE_HECTARES", "LOAD_DATE"
+        ) |>
+        sf::st_intersection(aoi) |>
+        # filter for recent fires
         dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - .data$FIRE_YEAR <= 20)
     }
     fires
   }
 
-  fires_list <- purrr::map(fire_records, get_one_fire)
-  fires_all <- dplyr::bind_rows(fires_list)
+  fires_all <- get_multi_datasets(fire_records, get_one_fire)
 
   if (all(is.na(fires_all)) || nrow(fires_all) == 0) {
     cli::cli_alert_warning("No recent fire disturbance in area of interest")
@@ -412,4 +414,11 @@ get_transmission_lines <- function(aoi, out_dir) {
   } else {
     cli::cli_alert_warning("No transmission lines in area of interest")
   }
+}
+
+get_multi_datasets <- function(ids, fun) {
+  ds_list <- purrr::map(ids, fun)
+
+  purrr::keep(ds_list, \(x) nrow(x) > 0) |>
+    dplyr::bind_rows()
 }
