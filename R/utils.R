@@ -103,16 +103,26 @@ recursive_layers_call <- function(layers, moddir = moddir, artifact = artifacts)
 #' @keywords internal
 #' @export
 #'
-read_crop <- function(f, poly, tmp){
-
+read_crop <- function(f, poly, tmp) {
   #--- extract tile index to match with index in polygons - works up to 1000 tiles ---#
-  index <- stringr::str_extract(f, pattern = "_([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)_")
-  index <- stringr::str_replace_all(index, pattern = "_", replacement = "") %>%
+  index <- stringr::str_extract(
+    f,
+    pattern = "_([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)_"
+  ) |>
+    stringr::str_replace_all(
+      index,
+      pattern = "_",
+      replacement = ""
+    ) |>
     as.numeric()
 
   #--- write rasters to tmp folder ---#
-  terra::writeRaster(terra::rast(f) %>% terra::crop(y = poly[index,]), paste0(tmp,basename(f)), overwrite = TRUE)
-
+  terra::rast(f) |>
+    terra::crop(y = poly[index, ]) |>
+    terra::writeRaster(
+      paste0(tmp, basename(f)),
+      overwrite = TRUE
+    )
 }
 
 #' Covariate file paths
