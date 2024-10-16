@@ -10,7 +10,8 @@ create_template_raster(
   filename = "template.tif",
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
   write_output = TRUE,
-  overwrite = TRUE
+  overwrite = TRUE,
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ subfolder labelled with the resolution.}
 If \code{TRUE} (default), will write to \code{out_dir}}
 
 \item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
+
+\item{...}{Additional options passed on to \code{...} in \code{\link[terra:writeRaster]{terra::writeRaster()}}}
 }
 \value{
 a terra raster
