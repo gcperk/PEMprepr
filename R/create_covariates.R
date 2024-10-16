@@ -56,9 +56,9 @@ create_covariates <- function(dtm = NULL,
 
 
   # internal data for package
-    data("layer_options", envir=environment())
-    data("moddir", envir=environment())
-    data("artifacts", envir=environment())
+    utils::data("layer_options", envir=environment())
+    utils::data("moddir", envir=environment())
+    utils::data("artifacts", envir=environment())
 
 #  load(fs::path("C:/r_repo/2024_pemr/testing_pemr/datecreek_aoi2/_meta/layer_options.rda"))
 #  load(fs::path("C:/r_repo/2024_pemr/testing_pemr/datecreek_aoi2/_meta/moddir.rda"))
