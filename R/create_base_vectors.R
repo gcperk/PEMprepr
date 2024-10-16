@@ -50,7 +50,7 @@ create_base_vectors.sf <- function(aoi, out_dir) {
 
   # Detect the CRS of the sf object
   if (is.na(sf::st_crs(aoi))) {
-    cli::cli_abort("CRS is not assigned. Use sf::st_crs() to assign a valid CRS to aoi")
+    cli::cli_abort("CRS is not assigned. Use {.fn sf::st_crs} to assign a valid CRS to aoi")
   }
 
   if (sf::st_is_longlat(aoi)) {
