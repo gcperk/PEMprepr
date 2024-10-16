@@ -243,26 +243,19 @@ get_water <- function(aoi, out_dir) {
   water_records <- c(
     "cb1e3aba-d3fe-4de1-a2d4-b8b6650fb1f6", # lakes
     "f7dac054-efbf-402f-ab62-6fc4b32a619e", # rivers
-    "93b413d8-1840-4770-9629-641d74bd1cc6"
-  ) # wetlands
-  for (i in 1:length(water_records)) {
-    waterbodies <- bcdata::bcdc_query_geodata(water_records[i]) |>
+    "93b413d8-1840-4770-9629-641d74bd1cc6" # wetlands
+  )
+
+  get_one_water <- function(id) {
+    bcdata::bcdc_query_geodata(id) |>
       bcdata::filter(bcdata::INTERSECTS(aoi)) |>
       bcdata::collect() |>
       dplyr::select("id", "WATERBODY_TYPE", "AREA_HA")
-
-    if (nrow(waterbodies) > 0) {
-      waterbodies <- sf::st_intersection(waterbodies, aoi)
-
-      waterbodies_sf <- waterbodies # |>
-      #  dplyr::select(id, WATERBODY_TYPE, AREA_HA)
-      if (i == 1) {
-        all_water <- waterbodies_sf
-      } else {
-        all_water <- dplyr::bind_rows(all_water, waterbodies_sf)
-      }
-    }
   }
+
+  water_list <- purrr::map(water_records, get_one_water)
+
+  all_water <- dplyr::bind_rows(water_list)
 
   sf::st_write(all_water, fs::path(out_dir, "water.gpkg"), append = FALSE)
 }
