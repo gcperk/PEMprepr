@@ -15,6 +15,7 @@
 #'    subfolder labelled with the resolution.
 #' @param write_output should the template raster be written to disk?
 #'     If `TRUE` (default), will write to `out_dir`
+#' @param ... Additional options passed on to `...` in [terra::writeRaster()]
 #' @inheritParams terra::writeRaster
 #'
 #' @return a terra raster
@@ -29,12 +30,15 @@
 #'     out_dir = PEMr::read_fid()$dir_1020_covariates$path_rel,
 #'     write_output = TRUE)
 #'}
-create_template_raster <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
-                                   res = 25,
-                                   filename = "template.tif",
-                                   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
-                                   write_output = TRUE,
-                                   overwrite = TRUE) {
+create_template_raster <- function(
+    aoi = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "aoi_snapped.gpkg"),
+    res = 25,
+    filename = "template.tif",
+    out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
+    write_output = TRUE,
+    overwrite = TRUE,
+    ...
+) {
 
   if (!is.numeric(res)) {
     cli::cli_abort("{.var res} must be numeric")
@@ -71,7 +75,7 @@ create_template_raster <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1010_
       )
     }
 
-    terra::writeRaster(template, output_file, overwrite = overwrite)
+    terra::writeRaster(template, output_file, overwrite = overwrite, ...)
     cli::cat_line()
     cli::cli_alert_success(
       "Template raster written to {.path {output_file}}"
