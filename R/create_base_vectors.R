@@ -19,14 +19,13 @@
 #'   sn_aoi,
 #'   out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs
 #' )
-#'}
+#' }
 create_base_vectors <- function(
     aoi = fs::path(
       PEMprepr::read_fid()$dir_1010_vector$path_abs,
       "aoi_snapped.gpkg"
     ),
-    out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs
-) {
+    out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs) {
   if (is.null(out_dir)) {
     cli::cli_abort("{.var out_dir} is an invalid file path string")
   }
@@ -47,7 +46,6 @@ create_base_vectors.character <- function(aoi, out_dir) {
 
 #' @export
 create_base_vectors.sf <- function(aoi, out_dir) {
-
   # Detect the CRS of the sf object
   if (is.na(sf::st_crs(aoi))) {
     cli::cli_abort("CRS is not assigned. Use {.fn sf::st_crs} to assign a valid CRS to aoi")
@@ -94,7 +92,7 @@ create_base_vectors.sf <- function(aoi, out_dir) {
 }
 
 #' @export
- create_base_vectors.sfc <- create_base_vectors.sf
+create_base_vectors.sfc <- create_base_vectors.sf
 
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
@@ -108,8 +106,8 @@ get_BEC <- function(aoi, out_dir) {
     dplyr::select("MAP_LABEL")
 
   if (nrow(bec) > 0) {
-      bec <- sf::st_intersection(bec, aoi)
-    }
+    bec <- sf::st_intersection(bec, aoi)
+  }
 
   if (sf::st_crs(aoi) == sf::st_crs(bec)) {
     sf::st_write(bec, fs::path(out_dir, "bec.gpkg"), append = FALSE)
@@ -134,9 +132,9 @@ get_VRI <- function(aoi, out_dir) {
     bcdata::collect() |>
     dplyr::select(c("BCLCS_LEVEL_2", "BCLCS_LEVEL_4", "PROJ_AGE_CLASS_CD_1", "SPECIES_CD_1"))
 
-      if (nrow(vri) > 0){
-        vri <- sf::st_intersection(vri, aoi)
-    }
+  if (nrow(vri) > 0) {
+    vri <- sf::st_intersection(vri, aoi)
+  }
 
   sf::st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
   cli::cat_line()
@@ -270,10 +268,10 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     bcdata::collect() |>
     dplyr::select("id", "ROAD_NAME_FULL", "ROAD_SURFACE", "ROAD_CLASS", "FEATURE_LENGTH_M")
 
-    if (nrow(roads) > 0) {
-        roads <- sf::st_intersection(roads, aoi) |>
-          sf::st_cast("MULTILINESTRING")
-      }
+  if (nrow(roads) > 0) {
+    roads <- sf::st_intersection(roads, aoi) |>
+      sf::st_cast("MULTILINESTRING")
+  }
 
 
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") |>
@@ -290,10 +288,10 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
       ROAD_CLASS == "unclassifed" ~ "rough"
     ))
 
-      if (nrow(fsr) > 0) {
-        fsr <- sf::st_intersection(fsr, aoi)
-          fsr <- sf::st_cast(fsr,"MULTILINESTRING")
-    }
+  if (nrow(fsr) > 0) {
+    fsr <- sf::st_intersection(fsr, aoi)
+    fsr <- sf::st_cast(fsr, "MULTILINESTRING")
+  }
 
   road_merge <- dplyr::bind_rows(roads, fsr)
 
@@ -373,9 +371,9 @@ get_parks <- function(aoi, out_dir) {
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
-    if (nrow(parks) > 0) {
-      parks <- sf::st_intersection(parks, aoi)
-    }
+  if (nrow(parks) > 0) {
+    parks <- sf::st_intersection(parks, aoi)
+  }
   if (nrow(parks) > 0) {
     sf::st_write(parks, fs::path(out_dir, "parks.gpkg"), append = FALSE)
   } else {
@@ -387,9 +385,9 @@ get_parks <- function(aoi, out_dir) {
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
-      if (nrow(national_parks) > 0) {
-        national_parks <- sf::st_intersection(national_parks, aoi)
-    }
+  if (nrow(national_parks) > 0) {
+    national_parks <- sf::st_intersection(national_parks, aoi)
+  }
   if (nrow(national_parks) > 0) {
     sf::st_write(national_parks, fs::path(out_dir, "natparks.gpkg"), append = FALSE)
   } else {
@@ -406,9 +404,9 @@ get_transmission_lines <- function(aoi, out_dir) {
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
     bcdata::collect()
 
-  if (nrow(  trans_line) > 0) {
-        trans_line <- sf::st_intersection(trans_line, aoi)
-    }
+  if (nrow(trans_line) > 0) {
+    trans_line <- sf::st_intersection(trans_line, aoi)
+  }
   if (nrow(trans_line) > 0) {
     sf::st_write(trans_line, fs::path(out_dir, "translines.gpkg"), append = FALSE)
   } else {
