@@ -255,7 +255,7 @@ get_water <- function(aoi, out_dir) {
     water
   }
 
-all_water <- get_multi_datasets(ids = water_records, fun = get_one_water)
+  all_water <- get_multi_datasets(ids = water_records, fun = get_one_water)
 
   sf::st_write(all_water, fs::path(out_dir, "water.gpkg"), append = FALSE)
 }
