@@ -39,19 +39,10 @@ create_template_raster <- function(
     write_output = TRUE,
     overwrite = TRUE,
     ...) {
+
   if (!is.numeric(res)) {
     cli::cli_abort("{.var res} must be numeric")
   }
-
-
-  if (inherits(aoi, c("character"))) {
-    # if(!fs::file_exists(aoi)) # check if exists and if not throw a warning.
-
-    aoi <- sf::st_read(aoi, quiet = TRUE)
-  } else if (!inherits(aoi, c("sf", "sfc"))) {
-    cli::cli_abort("{.var aoi} must be an sf or an sfc object or a path to a file")
-  }
-
 
   aoi_bb <- terra::vect(aoi)
 
