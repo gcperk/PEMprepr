@@ -321,35 +321,24 @@ get_fires <- function(aoi, out_dir) { #  cli::cli_alert_info("Downloading recent
     "22c7cb44-1463-48f7-8e47-88857f207702"
   )
 
-  fires_all <- NA ## placeholder
-
-  for (i in 1:length(fire_records)) {
-    fires <- bcdata::bcdc_query_geodata(fire_records[i]) |>
+  get_one_fire <- function(id) {
+    fires <- bcdata::bcdc_query_geodata(id) |>
       bcdata::filter(bcdata::INTERSECTS(aoi)) |>
-      bcdata::collect()
-
+      bcdata::collect() |>
+      dplyr::select(
+        "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
+        "FIRE_SIZE_HECTARES", "LOAD_DATE"
+      )
     # filter for recent fires
     if (nrow(fires) > 0) {
       fires <- sf::st_intersection(fires, aoi) |>
-        dplyr::select(
-          "id", "FIRE_NUMBER", "VERSION_NUMBER", "FIRE_YEAR",
-          "FIRE_SIZE_HECTARES", "LOAD_DATE"
-        ) |>
         dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - .data$FIRE_YEAR <= 20)
     }
-    if (nrow(fires) > 0) {
-      ## bind results of loops
-      if (i == 1) {
-        fires_all <- fires
-      } else { ## i > 1
-        if (all(is.na(fires_all))) {
-          fires_all <- fires
-        } else {
-          fires_all <- rbind(fires_all, fires)
-        }
-      }
-    }
+    fires
   }
+
+  fires_list <- purrr::map(fire_records, get_one_fire)
+  fires_all <- dplyr::bind_rows(fires_list)
 
   if (all(is.na(fires_all)) || nrow(fires_all) == 0) {
     cli::cli_alert_warning("No recent fire disturbance in area of interest")
@@ -357,7 +346,6 @@ get_fires <- function(aoi, out_dir) { #  cli::cli_alert_info("Downloading recent
     sf::st_write(fires_all, fs::path(out_dir, "fire.gpkg"), append = FALSE)
   }
 }
-
 
 ## 10. fire severity -------------------------------------
 get_fire_severity <- function(aoi, out_dir) {
