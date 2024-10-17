@@ -462,6 +462,8 @@ get_transmission_lines <- function(aoi, out_dir) {
   }
   if (nrow(trans_line) > 0) {
     sf::st_write(trans_line, fs::path(out_dir, "translines.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("transmission line data downloaded and to written to {.path {out_dir}}")
   } else {
     cli::cli_alert_warning("No transmission lines in area of interest")
   }
