@@ -107,17 +107,13 @@ get_BEC <- function(aoi, out_dir) {
 
   if (nrow(bec) > 0) {
     bec <- sf::st_intersection(bec, aoi)
-  }
-
-  if (sf::st_crs(aoi) == sf::st_crs(bec)) {
     sf::st_write(bec, fs::path(out_dir, "bec.gpkg"), append = FALSE)
     cli::cat_line()
     cli::cli_alert_success(
       "Bec layer downloaded and to written to {.path {out_dir}}"
     )
   } else {
-    # add conversion
-    message("convert or setting crs for bec data download")
+    cli::cli_alert_warning("No BEC data found, check your aoi is within the BEC mapping region")
   }
 }
 
