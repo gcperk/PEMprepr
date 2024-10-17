@@ -93,7 +93,6 @@ create_base_vectors.sf <- function(aoi, out_dir) {
 
 #' @export
 create_base_vectors.sfc <- create_base_vectors.sf
-
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
   cli::cli_alert_info("Downloading BEC layers")
@@ -116,8 +115,6 @@ get_BEC <- function(aoi, out_dir) {
     cli::cli_alert_warning("No BEC data found, check your aoi is within the BEC mapping region")
   }
 }
-
-
 ### 2) Download VRI -----------------------
 get_VRI <- function(aoi, out_dir) {
   cli::cli_alert_info("Downloading VRI layers")
@@ -130,45 +127,67 @@ get_VRI <- function(aoi, out_dir) {
 
   if (nrow(vri) > 0) {
     vri <- sf::st_intersection(vri, aoi)
+
+    sf::st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success(
+      "VRI layer downloaded and to written to {.path {out_dir}}"
+    )
+
+    # Subset VRI based on age class and deciduous species
+
+    # class 1 and 2 (0 - 40 yrs)
+
+    vri_class2 <- vri |>
+      dplyr::mutate(age_class = as.numeric(as.character(vri$PROJ_AGE_CLASS_CD_1))) |>
+      dplyr::filter(.data$age_class < 3)
+
+    if (nrow(vri_class2) > 0) {
+      sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
+      cli::cat_line()
+      cli::cli_alert_success(
+        "VRI class 1 and 2 (0-40 yrs) polygons subset and to written to {.path {out_dir}}"
+      )
+    } else {
+      cli::cat_line()
+      cli::cli_alert_warning("no VRI with class 1 and 2 found")
+    }
+
+    # class 1-3 (0 - 60 years)
+
+    vri_class3 <- vri |>
+      dplyr::mutate(age_class = as.numeric(as.character(vri$PROJ_AGE_CLASS_CD_1))) |>
+      dplyr::filter(.data$age_class == 3)
+
+    if (nrow(vri_class3) > 0) {
+      sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
+      cli::cat_line()
+      cli::cli_alert_success(
+        "VRI class 1 to 3 (0-60yrs) polygons subset and to written to {.path {out_dir}}"
+      )
+    } else {
+      cli::cat_line()
+      cli::cli_alert_warning("no VRI with class 1 to 3 found")
+    }
+
+    # deciduous predominant polygons
+
+    vri_decid <- vri |>
+      dplyr::filter(.data$SPECIES_CD_1 %in% c("AT", "EP")) # note might need to adjust for some areas of interest
+
+    if (nrow(vri_decid) > 0) {
+      sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
+      cli::cat_line()
+      cli::cli_alert_success("VRI class 1 to 3 (0-60yrs) polygons subset and to written to {.path {out_dir}}")
+    } else {
+      cli::cat_line()
+      cli::cli_alert_warning("note no deciduous polygons VRI detected within aoi")
+    }
+  } else {
+    cli::cat_line()
+    cli::cli_alert_warning("No VRI polygons detected, please check the study are is located within British Columbia or source data from another jurisdiction")
   }
-
-  sf::st_write(vri, fs::path(out_dir, "vri.gpkg"), append = FALSE)
-  cli::cat_line()
-  cli::cli_alert_success(
-    "VRI layer downloaded and to written to {.path {out_dir}}"
-  )
-  # post process VRI data into classes:
-
-  # Depending on the study area we want to focus on sampling in older areas - class 4 (60-80) or 5 (80 + )
-  # To do this we will define 2 vri age classess to exclude from the sampling area
-  # class 1 and 2 (0 - 40 yrs)
-  # class 1-3 (0 - 60 years)
-
-  vri_class2 <- vri |>
-    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter(.data$age_class < 3)
-
-  sf::st_write(vri_class2, fs::path(out_dir, "vri_class1_2.gpkg"), append = FALSE)
-
-  vri_class3 <- vri |>
-    dplyr::mutate(age_class = as.numeric("PROJ_AGE_CLASS_CD_1")) |>
-    dplyr::filter(.data$age_class == 3)
-
-  sf::st_write(vri_class3, fs::path(out_dir, "vri_class3.gpkg"), append = FALSE)
-
-  #
-  # ######### this section is currently in test phase (related to removal fo deciduous areas in Date Creek after these were found to be highly selected and challanging to sample)
-  #
-  # # vri - deciduous leading - this needs to be appled for some
-  #
-  # # STILL TO DO - for areas with deciduous leading (AT, EP) Aspen and paper burch these should be seperated using the code "SPECIES_CD_1" == AT|EP.
-  # # ie important in Date Creek
-  #
-  vri_decid <- vri |>
-    dplyr::filter(.data$SPECIES_CD_1 %in% c("AT", "EP")) # note might need to adjust for some areas of interest
-  sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
 }
-
 
 ### 3) Get harvest history and FTEN --------------------------------
 get_harvest <- function(aoi, out_dir) {
@@ -184,12 +203,19 @@ get_harvest <- function(aoi, out_dir) {
   if (nrow(cutblocks) > 0) {
     cutblocks <- sf::st_intersection(cutblocks, aoi) |>
       dplyr::filter(as.numeric(format(Sys.time(), "%Y")) - .data$HARVEST_YEAR <= 20)
+    sf::st_write(cutblocks, fs::path(out_dir, "cutblocks.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success(
+      "cutblock layers downloaded and to written to {.path {out_dir}}"
+    )
+  } else {
+    cli::cli_alert_warning("No cutblocks within the study area")
   }
-
-  sf::st_write(cutblocks, fs::path(out_dir, "cutblocks.gpkg"), append = FALSE)
 
   # 4) ften  - Download latest harvest layer
   cli::cli_alert_info("Downloading ften harvest layers")
+
+  current_less20yrs <- as.numeric(format(Sys.Date(), "%Y")) - 20
 
   ften <- bcdata::bcdc_query_geodata("cff7b8f7-6897-444f-8c53-4bb93c7e9f8b") |>
     bcdata::filter(bcdata::INTERSECTS(aoi)) |>
@@ -200,20 +226,26 @@ get_harvest <- function(aoi, out_dir) {
       "LIFE_CYCLE_STATUS_CODE", "FILE_STATUS_CODE"
     ) |>
     dplyr::filter(
-      as.numeric(format(.data$ISSUE_DATE, "%Y")) > 2000
-    ) # might need to adjust this to dynamic
+      as.numeric(format(.data$ISSUE_DATE, "%Y")) > current_less20yrs
+    )
 
-  sf::st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
+  if (nrow(ften) > 0) {
+    sf::st_write(ften, fs::path(out_dir, "ften.gpkg"), append = FALSE)
 
-  cutblocks_ften <- dplyr::bind_rows(cutblocks, ften)
+    cli::cat_line()
+    cli::cli_alert_success("ften layers downloaded and to written to {.path {out_dir}}")
+  } else {
+    cli::cli_alert_warning("No ften within the study area")
+  }
 
-  sf::st_write(cutblocks_ften, fs::path(out_dir, "cutblocks_ften.gpkg"), append = FALSE)
-
-  cli::cat_line()
-  cli::cli_alert_success(
-    "harvest layers downloaded and to written to {.path {out_dir}}"
-  )
+  if (nrow(ften) > 0 & nrow(cutblocks) > 0) {
+    cutblocks_ften <- dplyr::bind_rows(cutblocks, ften)
+    sf::st_write(cutblocks_ften, fs::path(out_dir, "cutblocks_ften.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("combined harvest layers downloaded and to written to {.path {out_dir}}")
+  }
 }
+
 
 ### 5) TEM -----------------------------
 get_TEM <- function(aoi, out_dir) {
@@ -226,6 +258,10 @@ get_TEM <- function(aoi, out_dir) {
   if (nrow(tem) > 0) {
     tem <- sf::st_intersection(tem, aoi)
     sf::st_write(tem, fs::path(out_dir, "tem.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("TEM layers downloaded and to written to {.path {out_dir}}")
+  } else {
+    cli::cli_alert_warning("No TEM data available within the study area")
   }
 }
 
@@ -254,6 +290,8 @@ get_water <- function(aoi, out_dir) {
   all_water <- get_multi_datasets(ids = water_records, fun = get_one_water)
 
   sf::st_write(all_water, fs::path(out_dir, "water.gpkg"), append = FALSE)
+  cli::cat_line()
+  cli::cli_alert_success("water layers downloaded and to written to {.path {out_dir}}")
 }
 
 ## 7) Download road network --------------------
@@ -269,6 +307,8 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   if (nrow(roads) > 0) {
     roads <- sf::st_intersection(roads, aoi) |>
       sf::st_cast("MULTILINESTRING")
+  } else {
+    cli::cli_alert_warning("No major roads data available within the study area")
   }
 
 
@@ -289,14 +329,21 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   if (nrow(fsr) > 0) {
     fsr <- sf::st_intersection(fsr, aoi)
     fsr <- sf::st_cast(fsr, "MULTILINESTRING")
+  } else {
+    cli::cli_alert_warning("No foresty roads data available within the study area")
   }
 
-  road_merge <- dplyr::bind_rows(roads, fsr)
 
-  # might need a check here
+  if (nrow(roads) > 0 & nrow(fsr) > 0) {
+    road_merge <- dplyr::bind_rows(roads, fsr)
+    sf::st_write(road_merge, fs::path(out_dir, "road_network.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("roads layers downloaded and to written to {.path {out_dir}}")
+  }
 
-  sf::st_write(road_merge, fs::path(out_dir, "road_network.gpkg"), append = FALSE)
+  # add check for individual layer missing.
 }
+
 
 ## 8 Major Towns ---------------------------------
 get_towns <- function(aoi, out_dir) {
@@ -340,6 +387,8 @@ get_fires <- function(aoi, out_dir) { #  cli::cli_alert_info("Downloading recent
     cli::cli_alert_warning("No recent fire disturbance in area of interest")
   } else {
     sf::st_write(fires_all, fs::path(out_dir, "fire.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("fire layers downloaded and to written to {.path {out_dir}}")
   }
 }
 
@@ -354,6 +403,8 @@ get_fire_severity <- function(aoi, out_dir) {
 
   if (nrow(fire_int) > 0) {
     sf::st_write(fire_int, fs::path(out_dir, "fire_int.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("fire severity downloaded and to written to {.path {out_dir}}")
   } else {
     cli::cli_alert_warning("No burn severity in AOI")
   }
@@ -374,6 +425,8 @@ get_parks <- function(aoi, out_dir) {
   }
   if (nrow(parks) > 0) {
     sf::st_write(parks, fs::path(out_dir, "parks.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("provincial park data downloaded and to written to {.path {out_dir}}")
   } else {
     cli::cli_alert_warning("no provincial parks in aoi")
   }
@@ -388,6 +441,8 @@ get_parks <- function(aoi, out_dir) {
   }
   if (nrow(national_parks) > 0) {
     sf::st_write(national_parks, fs::path(out_dir, "natparks.gpkg"), append = FALSE)
+    cli::cat_line()
+    cli::cli_alert_success("national parks downloaded and to written to {.path {out_dir}}")
   } else {
     cli::cli_alert_warning("no national parks in aoi")
   }
