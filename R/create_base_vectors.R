@@ -178,7 +178,7 @@ get_VRI <- function(aoi, out_dir) {
     if (nrow(vri_decid) > 0) {
       sf::st_write(vri_decid, fs::path(out_dir, "vri_decid.gpkg"), append = FALSE)
       cli::cat_line()
-      cli::cli_alert_success("VRI class 1 to 3 (0-60yrs) polygons subset and to written to {.path {out_dir}}")
+      cli::cli_alert_success("deciduous polygons subset and to written to {.path {out_dir}}")
     } else {
       cli::cat_line()
       cli::cli_alert_warning("note no deciduous polygons VRI detected within aoi")
