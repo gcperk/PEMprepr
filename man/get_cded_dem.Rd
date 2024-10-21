@@ -26,6 +26,8 @@ specified uses the default from the \code{fid} folder structure.}
 If \code{TRUE} (default), will write to \code{out_dir}}
 
 \item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
+
+\item{...}{arguments passed on to \code{\link[bcmaps:cded_terra]{bcmaps::cded_terra()}}}
 }
 \value{
 a spatRast file of CDED data
@@ -38,6 +40,6 @@ create_raster_template().
 \examples{
 \dontrun{
 get_cded_dem(aoi_bb = file.path(fid$shape_dir_1010[2],"aoi_snapped.gpkg"),
-    res = 5, out_dir = fid$cov_dir_1020[2]))
+    res = 5, out_dir = fid$cov_dir_1020[2]), ...)
 }
 }
