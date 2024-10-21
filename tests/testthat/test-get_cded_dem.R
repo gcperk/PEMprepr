@@ -12,6 +12,9 @@ test_that("get_cded fails with invalid input", {
 })
 
 test_that("get_cded_dem works with multiple input types", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
   aoi_snapped <- make_test_aoi(outdir)
@@ -53,6 +56,9 @@ test_that("get_cded_dem works with multiple input types", {
 })
 
 test_that("res works", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
   aoi_snapped <- make_test_aoi(outdir)

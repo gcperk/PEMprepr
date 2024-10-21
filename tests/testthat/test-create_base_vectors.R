@@ -8,6 +8,9 @@ test_that("create_base_vectors fails with invalid input", {
 })
 
 test_that("create_base_vectors works with sf object", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
   aoi_snapped <- make_test_aoi(outdir)
@@ -22,6 +25,9 @@ test_that("create_base_vectors works with sf object", {
 })
 
 test_that("create_base_vectors works with file", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
   aoi_snapped <- make_test_aoi(outdir)
