@@ -51,3 +51,21 @@ test_that("get_cded_dem works with multiple input types", {
   )
 
 })
+
+test_that("res works", {
+  outdir <- withr::local_tempdir()
+
+  aoi_snapped <- make_test_aoi(outdir)
+
+  aoi_rast <- create_template_raster(aoi_snapped, res = 100,out_dir = outdir)
+
+  rast_cded <- get_cded_dem(
+    aoi_rast,
+    res = 100,
+    out_dir = outdir,
+    write_output = FALSE,
+    ask = FALSE
+  )
+
+  expect_equal(terra::res(rast_cded), c(100, 100))
+})
