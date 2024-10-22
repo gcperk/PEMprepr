@@ -10,7 +10,8 @@ get_cded_dem(
   res = 5,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
   write_output = TRUE,
-  overwrite = FALSE
+  overwrite = FALSE,
+  ...
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ specified uses the default from the \code{fid} folder structure.}
 If \code{TRUE} (default), will write to \code{out_dir}}
 
 \item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
+
+\item{...}{arguments passed on to \code{\link[bcmaps:cded_terra]{bcmaps::cded_terra()}}}
 }
 \value{
 a spatRast file of CDED data

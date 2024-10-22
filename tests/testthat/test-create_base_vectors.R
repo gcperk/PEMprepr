@@ -8,12 +8,12 @@ test_that("create_base_vectors fails with invalid input", {
 })
 
 test_that("create_base_vectors works with sf object", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
-  aoi_snapped <- snap_aoi(
-    fs::path_package("PEMprepr", "extdata/datecreek_aoi.gpkg"),
-    out_dir = fs::path(outdir, "snap")
-  )
+  aoi_snapped <- make_test_aoi(outdir)
 
   out <- create_base_vectors(
     aoi_snapped,
@@ -25,12 +25,12 @@ test_that("create_base_vectors works with sf object", {
 })
 
 test_that("create_base_vectors works with file", {
+  skip_if_offline()
+  skip_on_cran()
+
   outdir <- withr::local_tempdir()
 
-  aoi_snapped <- snap_aoi(
-    fs::path_package("PEMprepr", "extdata/datecreek_aoi.gpkg"),
-    out_dir = fs::path(outdir, "snap")
-  )
+  aoi_snapped <- make_test_aoi(outdir)
 
   out <- create_base_vectors(
     fs::path(outdir, "snap", "aoi_snapped.gpkg"),
