@@ -46,8 +46,8 @@ create_bgc_template = function(
   if (inherits(template_rast, c("character"))) {
     template_rast <- terra::rast(template_rast)
 
-  } else if (!inherits(template_rast, c("SpatRast"))) {
-    cli::cli_abort("{.var template_rast} must be a SpastRast or a path to a file")
+  } else if (!inherits(template_rast, c("SpatRaster"))) {
+    cli::cli_abort("{.var template_rast} must be a SpatRaster or a path to a file")
   }
 
   bec_vec <- terra::vect(bec)
@@ -59,8 +59,8 @@ create_bgc_template = function(
     pixal_size = terra::res(template_rast)[1]
     full_out_dir = fs::path(fs::path_abs(out_dir),  paste0(pixal_size,"m"))
 
-    if (!fs::dir_exists( full_out_dir)) {
-      fs::dir_create(out_dir, recurse = TRUE)
+    if (!fs::dir_exists(full_out_dir)) {
+      fs::dir_create(full_out_dir, recurse = TRUE)
       cli::cli_alert_warning(
         "write out folder does not exist, creating at location {.path {full_out_dir}}"
       )
