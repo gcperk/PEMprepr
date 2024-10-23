@@ -23,7 +23,7 @@
 #'     res = 5, out_dir = fid$cov_dir_1020[2]))
 #' }
 get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
-                         res = 5,
+                         res = FALSE,
                          out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
                          write_output = TRUE,
                          overwrite = FALSE, ...) {
@@ -33,8 +33,19 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
     cli::cli_abort("{.var aoi} must be an spatRast or a path to a .tif file")
   }
 
-  if (!is.numeric(res)) {
-    cli::cli_abort("{.var res} must be numeric")
+  aoi_res <- terra::res(aoi)[1]
+
+  if(res) {
+    if (!is.numeric(res)) {
+      cli::cli_abort("{.var res} must be numeric")
+    }
+
+    output_res <- res
+  } else {
+    output_res <- aoi_res
+    cli::cli_alert_warning(
+      "No spatial resolution specified, cded output resolution will match input raster"
+    )
   }
 
   output_dir <- fs::path(out_dir, paste0(res, "m"))
@@ -42,6 +53,12 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
   cded_raw <- bcmaps::cded_terra(aoi, ...)
 
   cded <- terra::project(cded_raw, aoi)
+
+  cded_res <- terra::res(cded)[1]
+
+  if(cded_res != output_res) {
+    cded <- terra::disagg(cded, cded_res/output_res)
+  }
 
 
   ## check if folder exists
