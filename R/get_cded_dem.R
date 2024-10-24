@@ -52,6 +52,11 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
 
   cded_raw <- bcmaps::cded_terra(aoi, ...)
 
+
+
+
+  aoi_rast <- create_template_raster(aoi, res = res, write_output = FALSE )
+
   cded <- terra::project(cded_raw, aoi)
 
   cded_res <- terra::res(cded)[1]
