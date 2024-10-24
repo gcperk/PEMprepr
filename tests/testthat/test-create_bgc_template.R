@@ -6,11 +6,11 @@ test_that("create_bec_template works with multiple input types", {
   outdir <- withr::local_tempdir()
 
   aoi_snapped <- make_test_aoi(outdir)
-  bec_test <- make_test_bec(outdir)
+  get_BEC(aoi_snapped, outdir)
   rast_temp <- create_template_raster(aoi_snapped, write_output = FALSE)
 
   bec_rast <- create_bgc_template(
-    bec =  bec_test,
+    bec =  sf::read_sf(outdir, "bec.gpkg"),
     field = "MAP_LABEL",
     template_rast = rast_temp,
     write_output = TRUE,
