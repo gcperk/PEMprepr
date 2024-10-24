@@ -1,4 +1,6 @@
 test_that("get_cded fails with invalid input", {
+  skip_if_offline()
+  skip_on_cran()
 
   outdir <- withr::local_tempdir()
 
