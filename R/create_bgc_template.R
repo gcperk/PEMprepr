@@ -1,48 +1,70 @@
 #' Create BGC template
 #'
-#' @param bec_sf sf object with bec linework ro filepath
-#' @param field field within in sf object which will be used to assign raster value
-#' @param template raster object of the size in which to model output raster not including the resoution subfolder
-#' @param outpath location in which output to be saved, default is based on fid object. Note resolution of template will be used determine folder in which output is saved
+#' @param bec An `sf` object (e.g. polygon) or path to a spatial file of BEC within your AOI.
+#'      Usually generated when calling [create_base_vectors()].
+#' @param field field within bec object which defines the BEC units. Default is `"MAP_LABEL"`
+#' @param template_rast A `SpatRast` template or path to a spatRast file, which will form the
+#'      template resolution and extent output. The template is currently created using the
+#'      create_base_raster() function.
+#' @param write_output should the bec raster be written to disk?
+#'     If `TRUE` (default), will write to `out_dir` under the appropriate resolution subfolder.
+#' @param out_dir A character string of filepath which points to output location. A default
+#'    location and name are applied in line with standard workflow.
 #' @return write out bgc raster and return object
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' bgc_raster = create_bgc_template( bec_sf, field = "MAP_LABEL",
-#' template = r25,outpath = fid$cov_dir_1020[2])
-#'}
+#' bgc_raster = create_bgc_template(
+#'   bec = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "bec.gpkg"),
+#'   field = "MAP_LABEL",
+#'   template_rast = NULL,
+#'   write_output = TRUE,
+#'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+#' }
 
-# create_bgc_template = function(bec_sf,
-#                                field = "MAP_LABEL",
-#                                template = r25,
-#                                outpath = fid$cov_dir_1020[2]
-#                                ){
-#
-#   if(class(bec_sf) =="character"){
-#
-#     bec_sf <- sf::st_read(file.path(fid$shape_dir_1010[2], "bec.gpkg")) |>
-#        sf::st_cast("MULTIPOLYGON")
-#
-#   }
-#   bec_code <- bec_sf |> sf::st_drop_geometry()  |> dplyr::select(any_of(field)) |>
-#     unique()
-#
-#   bec_code <- bec_code |>
-#     dplyr::mutate(bgc_unique_code = seq(1, length(bec_code[,1]),1))
-#
-#   bec_sf <- dplyr::left_join(bec_sf, bec_code)
-#
-#   bec_vec <- terra::vect(bec_sf)
-#
-#   # generate a 25m raster
-#
-#   bec_ras25 <- terra::rasterize(bec_vec, r25, field = field)
-#   pixal_size = terra::res(r25)[1]
-#
-#   terra::writeRaster(bec_ras25, file.path(outpath, paste0(pixal_size,"m"), "bec.tif"), overwrite = TRUE)
-#
-#
-#   print(paste("Template raster create and saved as:", file.path(outpath, paste0(pixal_size,"m"), "bec.tif")))
-#   return(bec_ras25)
-# }
+create_bgc_template <- function(
+    bec = fs::path(PEMprepr::read_fid()$dir_1010_vector$path_abs, "bec.gpkg"),
+    field = "MAP_LABEL",
+    template_rast = NULL,
+    write_output = TRUE,
+    out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel) {
+
+  if (inherits(template_rast, c("character"))) {
+    template_rast <- terra::rast(template_rast)
+  } else if (!inherits(template_rast, c("SpatRaster"))) {
+    cli::cli_abort("{.var template_rast} must be a SpatRaster or a path to a file")
+  }
+
+  bec_vec <- terra::vect(bec)
+
+  bec_rast <- terra::rasterize(bec_vec, template_rast, field = field)
+
+  if (write_output) {
+    pixal_size <- terra::res(template_rast)[1]
+    full_out_dir <- fs::path(fs::path_abs(out_dir), paste0(pixal_size, "m"))
+
+    if (!fs::dir_exists(full_out_dir)) {
+      fs::dir_create(full_out_dir, recurse = TRUE)
+      cli::cli_alert_warning(
+        "write out folder does not exist, creating at location {.path {full_out_dir}}"
+      )
+    }
+
+    output_file <- fs::path(fs::path_abs(full_out_dir), "bec.tif")
+
+    if (fs::file_exists(output_file)) {
+      cli::cli_alert_warning(
+        "Bec raster already exists in {.path {output_file}}"
+      )
+    }
+
+    terra::writeRaster(bec_rast, fs::path(output_file), overwrite = TRUE)
+    cli::cat_line()
+    cli::cli_alert_success(
+      "Bec Raster written to {.path {output_file}}"
+    )
+  }
+
+  bec_rast
+}
