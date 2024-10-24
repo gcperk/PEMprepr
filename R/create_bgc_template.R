@@ -78,5 +78,5 @@ create_bgc_template = function(
     )
   }
 
-  return(bec_rast)
+  bec_rast
 }
