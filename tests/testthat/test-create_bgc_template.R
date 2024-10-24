@@ -10,7 +10,7 @@ test_that("create_bec_template works with multiple input types", {
   rast_temp <- create_template_raster(aoi_snapped, write_output = FALSE)
 
   bec_rast <- create_bgc_template(
-    bec =  sf::read_sf(outdir, "bec.gpkg"),
+    bec =  sf::read_sf(fs::path(outdir, "bec.gpkg")),
     field = "MAP_LABEL",
     template_rast = rast_temp,
     write_output = TRUE,
