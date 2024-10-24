@@ -5,7 +5,7 @@
 #' create_raster_template().
 #'
 #' @param  aoi An `SpatRast` object or path to a spatial file (.tif) usually generated
-#'      when calling [create_base_raster()]. Should be a meter based coordinate reference system.
+#'      when calling [create_template_raster()]. Should be a meter based coordinate reference system.
 #' @param res resolution in meters of final project. If no values specified (default is FALSE),
 #'      output spatRast will match the resolution of aoi.
 #' @param write_output should the cded spatRast be written to disk?
@@ -53,8 +53,8 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
       )
 
       aoi_out <- aoi
-      res(aoi_out) = res
-      aoi_template <- resample(aoi, aoi_out)
+      terra::res(aoi_out) <- res
+      aoi_template <- terra::resample(aoi, aoi_out)
 
     } else {
 

@@ -16,7 +16,7 @@ get_cded_dem(
 }
 \arguments{
 \item{aoi}{An \code{SpatRast} object or path to a spatial file (.tif) usually generated
-when calling \code{\link[=create_base_raster]{create_base_raster()}}. Should be a meter based coordinate reference system.}
+when calling \code{\link[=create_template_raster]{create_template_raster()}}. Should be a meter based coordinate reference system.}
 
 \item{res}{resolution in meters of final project. If no values specified (default is FALSE),
 output spatRast will match the resolution of aoi.}
