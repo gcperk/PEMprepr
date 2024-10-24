@@ -1,6 +1,6 @@
 #' Create BGC template
 #'
-#' @param bec An `sf` object (e.g. polygon) or path to a spatial file
+#' @param bec An `sf` object (e.g. polygon) or path to a spatial file of BEC within your AOI. Usually generated when calling [create_base_vectors()].
 #' @param field field within in bec object which defines the BEC units. Default is "MAP_LABEL"
 #' @param template_rast A `SpatRast` template or path to a spatRast file, which will form the
 #'      template resolution and extent output. The template is currently created using the
