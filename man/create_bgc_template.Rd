@@ -13,9 +13,10 @@ create_bgc_template(
 )
 }
 \arguments{
-\item{bec}{An \code{sf} object (e.g. polygon) or path to a spatial file}
+\item{bec}{An \code{sf} object (e.g. polygon) or path to a spatial file of BEC within your AOI.
+Usually generated when calling \code{\link[=create_base_vectors]{create_base_vectors()}}.}
 
-\item{field}{field within in bec object which defines the BEC units. Default is "MAP_LABEL"}
+\item{field}{field within bec object which defines the BEC units. Default is \code{"MAP_LABEL"}}
 
 \item{template_rast}{A \code{SpatRast} template or path to a spatRast file, which will form the
 template resolution and extent output. The template is currently created using the
