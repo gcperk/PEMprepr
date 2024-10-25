@@ -41,7 +41,7 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
 
   aoi_res <- terra::res(aoi)[1]
 
-  if(res) {
+  if (!is.null(res)) { 
     if (!is.numeric(res)) {
       cli::cli_abort("{.var res} must be numeric")
     }
