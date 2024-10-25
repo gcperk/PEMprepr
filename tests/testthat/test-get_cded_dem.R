@@ -8,7 +8,7 @@ test_that("get_cded fails with invalid input", {
 
   aoi_rast <- create_template_raster(aoi_snapped, res = 50, out_dir = outdir)
 
-  expect_error(get_cded_dem(aoi = 1, res = 1))
+  expect_error(get_cded_dem(aoi = 1, res = FALSE))
   expect_error(get_cded_dem(aoi = aoi_rast, res = "number"))
 
 })
@@ -21,7 +21,7 @@ test_that("get_cded_dem works with multiple input types", {
 
   aoi_snapped <- make_test_aoi(outdir)
 
-  aoi_rast <- create_template_raster(aoi_snapped, res = 50,out_dir = outdir)
+  aoi_rast <- create_template_raster(aoi_snapped, res = 50, out_dir = outdir)
 
   rast_cded <- get_cded_dem(
     aoi_rast,
@@ -57,7 +57,7 @@ test_that("get_cded_dem works with multiple input types", {
 
 })
 
-test_that("res works", {
+test_that("default res works", {
   skip_if_offline()
   skip_on_cran()
 
@@ -69,7 +69,6 @@ test_that("res works", {
 
   rast_cded <- get_cded_dem(
     aoi_rast,
-    res = 100,
     out_dir = outdir,
     write_output = FALSE,
     ask = FALSE

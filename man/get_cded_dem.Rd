@@ -7,7 +7,7 @@
 get_cded_dem(
   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m",
     "template.tif"),
-  res = 5,
+  res = NULL,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
   write_output = TRUE,
   overwrite = FALSE,
@@ -15,16 +15,17 @@ get_cded_dem(
 )
 }
 \arguments{
-\item{aoi}{the \code{SpatRast} created using the create_base_raster() on which the
-DEM data will be extracted, currently accepts raster (.tif) or filepath.}
+\item{aoi}{An \code{SpatRast} object or path to a spatial file (.tif) usually generated
+when calling \code{\link[=create_template_raster]{create_template_raster()}}. Should be a meter based coordinate reference system.}
 
-\item{res}{resolution in meters of final project}
+\item{res}{resolution in meters of final project. If no values specified (default is \code{NULL}),
+output spatRast will match the resolution of aoi.}
 
 \item{out_dir}{the root directory to hold the cded dem spatRast file. If not
 specified uses the default from the \code{fid} folder structure.}
 
-\item{write_output}{should the snapped aoi bounding box be written to disk?
-If \code{TRUE} (default), will write to \code{out_dir}}
+\item{write_output}{should the cded spatRast be written to disk?
+If \code{TRUE} (default), will write to \code{out_dir} in a subfolder defined by resolution e.g: "25m".}
 
 \item{overwrite}{logical. If \code{TRUE}, \code{filename} is overwritten}
 
@@ -40,7 +41,11 @@ create_raster_template().
 }
 \examples{
 \dontrun{
-get_cded_dem(aoi_bb = file.path(fid$shape_dir_1010[2],"aoi_snapped.gpkg"),
-    res = 5, out_dir = fid$cov_dir_1020[2]))
+get_cded_dem(
+  aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
+  res = FALSE,
+  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
+  write_output = TRUE
+  overwrite = FALSE)
 }
 }
