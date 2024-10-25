@@ -57,7 +57,7 @@ test_that("get_cded_dem works with multiple input types", {
 
 })
 
-test_that("res works", {
+test_that("default res works", {
   skip_if_offline()
   skip_on_cran()
 
@@ -69,7 +69,6 @@ test_that("res works", {
 
   rast_cded <- get_cded_dem(
     aoi_rast,
-    res = 100,
     out_dir = outdir,
     write_output = FALSE,
     ask = FALSE
