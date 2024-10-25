@@ -7,7 +7,7 @@ test_that("create_base_vectors fails with invalid input", {
   )
 })
 
-test_that("create_base_vectors works with sf object", {
+test_that("create_base_vectors works with sf and/or path to file", {
   skip_if_offline()
   skip_on_cran()
 
@@ -15,25 +15,19 @@ test_that("create_base_vectors works with sf object", {
 
   aoi_snapped <- make_test_aoi(outdir)
 
-  out <- create_base_vectors(
-    aoi_snapped,
-    out_dir = outdir
+  # Randomly select sf or character method to test, so we only run the whole
+  # function once - it is a lot of bcdata calls!
+  which_method <- sample(c("sf", "character"), size = 1)
+  input <- switch(
+    which_method,
+    "sf" = aoi_snapped,
+    "character" = fs::path(outdir, "snap", "aoi_snapped.gpkg")
   )
 
-  expect_equal(outdir, out)
-  expect_snapshot(fs::path_file(fs::dir_ls(outdir)))
-})
-
-test_that("create_base_vectors works with file", {
-  skip_if_offline()
-  skip_on_cran()
-
-  outdir <- withr::local_tempdir()
-
-  aoi_snapped <- make_test_aoi(outdir)
+  message("Testing ", which_method, " method of `create_base_vectors()")
 
   out <- create_base_vectors(
-    fs::path(outdir, "snap", "aoi_snapped.gpkg"),
+    input,
     out_dir = outdir
   )
 
