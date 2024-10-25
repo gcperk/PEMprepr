@@ -52,9 +52,7 @@ get_cded_dem <- function(
     output_res <- terra::res(aoi_template)[1]
     output_dir <- fs::path(out_dir, paste0(output_res, "m"))
 
-    if (!fs::dir_exists(fs::path(output_dir))) {
-      fs::dir_create(fs::path(output_dir), recurse = TRUE)
-    }
+    fs::dir_create(fs::path(output_dir), recurse = TRUE)
     terra::writeRaster(cded, fs::path(output_dir, "dem.tif"), overwrite = overwrite)
     cli::cat_line()
     cli::cli_alert_success(
