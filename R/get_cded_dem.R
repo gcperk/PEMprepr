@@ -6,7 +6,7 @@
 #'
 #' @param  aoi An `SpatRast` object or path to a spatial file (.tif) usually generated
 #'      when calling [create_template_raster()]. Should be a meter based coordinate reference system.
-#' @param res resolution in meters of final project. If no values specified (default is FALSE),
+#' @param res resolution in meters of final project. If no values specified (default is `NULL`),
 #'      output spatRast will match the resolution of aoi.
 #' @param write_output should the cded spatRast be written to disk?
 #'     If `TRUE` (default), will write to `out_dir` in a subfolder defined by resolution e.g: "25m".
