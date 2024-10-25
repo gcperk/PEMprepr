@@ -18,8 +18,7 @@ test_that("create_base_vectors works with sf and/or path to file", {
   # Randomly select sf or character method to test, so we only run the whole
   # function once - it is a lot of bcdata calls!
   which_method <- sample(c("sf", "character"), size = 1)
-  input <- switch(
-    which_method,
+  input <- switch(which_method,
     "sf" = aoi_snapped,
     "character" = fs::path(outdir, "snap", "aoi_snapped.gpkg")
   )
