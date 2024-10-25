@@ -22,7 +22,7 @@
 #' \dontrun{
 #' get_cded_dem(
 #'   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
-#'   res = FALSE,
+#'   res = NULL,
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
 #'   write_output = TRUE,
 #'   overwrite = FALSE
