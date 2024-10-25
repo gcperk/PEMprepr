@@ -7,7 +7,7 @@
 get_cded_dem(
   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m",
     "template.tif"),
-  res = FALSE,
+  res = NULL,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
   write_output = TRUE,
   overwrite = FALSE,
@@ -18,7 +18,7 @@ get_cded_dem(
 \item{aoi}{An \code{SpatRast} object or path to a spatial file (.tif) usually generated
 when calling \code{\link[=create_template_raster]{create_template_raster()}}. Should be a meter based coordinate reference system.}
 
-\item{res}{resolution in meters of final project. If no values specified (default is FALSE),
+\item{res}{resolution in meters of final project. If no values specified (default is \code{NULL}),
 output spatRast will match the resolution of aoi.}
 
 \item{out_dir}{the root directory to hold the cded dem spatRast file. If not
