@@ -1,4 +1,4 @@
-#'#' Get Canadian Digital Elevation Data (CDED) to match area of interest
+#' Get Canadian Digital Elevation Data (CDED) to match area of interest
 #'
 #' This function is a wrapper for bcmaps::cded_terra() to extract data from the
 #' Canadian Digital Elevation Data set to match the raster template built using
@@ -24,64 +24,32 @@
 #'   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
 #'   res = FALSE,
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
-#'   write_output = TRUE
-#'   overwrite = FALSE)
+#'   write_output = TRUE,
+#'   overwrite = FALSE
+#' )
 #' }
-get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
-                         res = NULL,
-                         out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
-                         write_output = TRUE,
-                         overwrite = FALSE, ...) {
-
+get_cded_dem <- function(
+    aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
+    res = NULL,
+    out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
+    write_output = TRUE,
+    overwrite = FALSE,
+    ...) {
   if (inherits(aoi, c("character"))) {
     aoi <- terra::rast(aoi)
   } else if (!inherits(aoi, c("SpatRaster"))) {
     cli::cli_abort("{.var aoi} must be a SpatRaster or a path to a file")
   }
 
-  aoi_res <- terra::res(aoi)[1]
-
-  if (!is.null(res)) { 
-    if (!is.numeric(res)) {
-      cli::cli_abort("{.var res} must be numeric")
-    }
-
-    if(aoi_res != res) {
-
-      cli::cli_alert_warning(
-        "Updating cded to resolution specified"
-      )
-
-      aoi_out <- aoi
-      terra::res(aoi_out) <- res
-      aoi_template <- terra::resample(aoi, aoi_out)
-
-    } else {
-
-      aoi_template <- aoi
-      cli::cli_alert_warning(
-        "Specified res matches template resolution, output cded resolution will be {.var res}"
-      )
-    }
-
-    output_res <- res
-
-  } else {
-
-    aoi_template <- aoi
-    output_res <- aoi_res
-    cli::cli_alert_warning(
-      "No spatial resolution specified, cded output spatial resolution will match input raster"
-    )
-  }
+  aoi_template <- make_aoi_template(aoi, res)
 
   cded_raw <- bcmaps::cded_terra(aoi_template, ...)
-  #cded_raw <- bcmaps::cded_terra(aoi_template)#, ...)
+  # cded_raw <- bcmaps::cded_terra(aoi_template)#, ...)
 
   cded <- terra::project(cded_raw, aoi_template)
 
   if (write_output) {
-
+    output_res <- terra::res(aoi_template)[1]
     output_dir <- fs::path(out_dir, paste0(output_res, "m"))
 
     if (!fs::dir_exists(fs::path(output_dir))) {
@@ -95,4 +63,30 @@ get_cded_dem <- function(aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates
   }
 
   cded
+}
+
+make_aoi_template <- function(aoi, res) {
+  aoi_res <- terra::res(aoi)[1]
+
+  if (is.null(res) || res == aoi_res) {
+    cli::cli_alert_warning(
+      "No spatial resolution specified or res matches template resolution,
+      output cded resolution will be {.var {res}}"
+    )
+    return(aoi)
+  }
+
+  if (!is.numeric(res)) {
+    cli::cli_abort("{.var res} must be numeric")
+  }
+
+  if (aoi_res != res) {
+    cli::cli_alert_warning(
+      "Updating cded to resolution specified"
+    )
+
+    aoi_out <- aoi
+    terra::res(aoi_out) <- res
+    terra::resample(aoi, aoi_out)
+  }
 }
