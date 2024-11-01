@@ -25,7 +25,6 @@ if (!exists("%||%", envir = baseenv())) {
 
 
 find_saga_path <- function(root = NULL) {
-
   # Set root path depending on operating system
   if (is.null(root)) {
     if (Sys.info()["sysname"] == "Windows") {
@@ -40,11 +39,9 @@ find_saga_path <- function(root = NULL) {
   sloc <- fs::dir_ls(path = root, type = "file", glob = "*saga_cmd.exe", recurse = TRUE, fail = FALSE)
 
 
-  if(length(sloc >0)) {
-
+  if (length(sloc > 0)) {
     cli::cat_line()
-    cli::cli_alert_success( "congratulations there are matches, select one of the following for your saga_path")
-
+    cli::cli_alert_success("congratulations there are matches, select one of the following for your saga_path")
   } else {
     cli::cli_abort("no matching files found.. please check you have saga installed")
   }
@@ -55,23 +52,20 @@ find_saga_path <- function(root = NULL) {
 
 
 
-check_saga <- function(saga_path = NULL){
-
-  if(is.null(saga_path)){
-
+check_saga <- function(saga_path = NULL) {
+  if (is.null(saga_path)) {
     cli::cli_abort("{.var saga_path} must be a path to the SAGA_cmd location on your computer.
                    Please check your program files or use `find_saga_path()` to locate the saga_cmd.exe file")
   }
 
-  if(Sys.info()['sysname']=="Windows"){
+  if (Sys.info()["sysname"] == "Windows") {
     saga_cmd <- fs::path(saga_path)
-    fns      <- "\\" ### file name separator
+    fns <- "\\" ### file name separator
   } else {
     saga_cmd <- "saga_cmd"
-    fns      <- "/" ### file name separator
-
-  }  ;
-  z <- system(paste(saga_cmd, "-v"), intern = TRUE)  ## prints that SAGA version number -- confirming it works.
+    fns <- "/" ### file name separator
+  }
+  z <- system(paste(saga_cmd, "-v"), intern = TRUE) ## prints that SAGA version number -- confirming it works.
   z <- print(z[1])
   v <- suppressWarnings(as.numeric(unlist(strsplit(z, "[[:punct:][:space:]]+")[1])))
   v <- v[!is.na(v)][1:2]
@@ -80,8 +74,6 @@ check_saga <- function(saga_path = NULL){
   if (v < 7.6) {
     warning("SAGA-GIS is less that 7.6.  Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
   }
-
-
 }
 
 

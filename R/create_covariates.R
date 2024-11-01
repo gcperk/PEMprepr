@@ -41,24 +41,21 @@
 #' #--- create all SAGA covariates ---#
 #' create_covariates(dtm = tmp, layers = "all", output = dir, SAGApath = SAGApath)
 #'}
-
 create_covariates <- function(dtm = NULL,
                               saga_path = NULL,
                               out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                               layers = "all",
                               tile = FALSE # this is placeholder for tiled outputs
-){
-
+) {
   #  # start testing
-  #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-  #saga_path = "C:/Program Files/SAGA/saga-9.2.0_x64/saga-9.2.0_x64/saga_path.exe"
-  #saga_path= sl[3]
-  #out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-  #layers = "all"
-  #tile = FALSE
+  # dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
+  # saga_path = "C:/Program Files/SAGA/saga-9.2.0_x64/saga-9.2.0_x64/saga_path.exe"
+  # out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+  # layers = "all"
+  # tile = FALSE
 
   moddir <- fs::path_package("PEMprepr", "extdata/saga_module_depends.csv")
-  #moddir <- read.csv("saga_module_depends.csv")
+  # moddir <- read.csv("saga_module_depends.csv")
 
   #  # end testing
 
@@ -68,7 +65,8 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(fs::path(dtm))) {
       cli::cli_abort("{.var dtm} must point to an existing dtm file")
     } else {
-      dtm <- terra::rast(dtm)}
+      dtm <- terra::rast(dtm)
+    }
   }
 
   #--- get resolution of dtm ---#
@@ -77,12 +75,11 @@ create_covariates <- function(dtm = NULL,
 
   #--- SAGA ---#
 
-  if(!is.null(saga_path)){
+  if (!is.null(saga_path)) {
     check_saga(saga_path)
     cli::cli_alert_success(
       "Your SAGA connection has been succesfuly set up. Using the {.var {saga_path}}"
     )
-
   } else {
     check_saga()
     cli::cli_abort("{.var saga_path} must point to the saga_path location on your computer.
@@ -114,7 +111,7 @@ create_covariates <- function(dtm = NULL,
   )
 
 
-  if(!inherits(layers, "character")){
+  if (!inherits(layers, "character")) {
     cli::cli_abort("{.var layers} must be a character string of the names of variables")
   }
 
@@ -126,7 +123,7 @@ create_covariates <- function(dtm = NULL,
   errorl <- setdiff(layers, layer_options)
 
   if (length(errorl) > 0) {
-    cli::cli_abort("Layers contains covariates that are not a valid options, please review the following layer inputs: { errorl}" )
+    cli::cli_abort("Layers contains covariates that are not a valid options, please review the following layer inputs: { errorl}")
   }
 
 
@@ -146,7 +143,7 @@ create_covariates <- function(dtm = NULL,
 
   # if tiling is true give a message for artifact covariates
 
-  if(tile){
+  if (tile) {
     artifacts <- dplyr::filter(moddir, stringr::str_detect(moddir$module, paste(mods, collapse = "|")))
     artifacts_cov <- dplyr::filter(artifacts, artifacts$tile_artifact == TRUE)
     artifacts_cov$module
@@ -164,43 +161,36 @@ create_covariates <- function(dtm = NULL,
   #--- extract dtm basename for naming convention ---#
   #--- helps to ensure tiles are matched properly during parallel processing ---#
 
-  #nm <- tools::file_path_sans_ext(basename(dtm))
+  # nm <- tools::file_path_sans_ext(basename(dtm))
 
 
   # OUTPUTS: ------------------------------------------------------------
 
   #--- check outputs ---#
-  output_dir <- fs::path(out_dir, paste0(rn,"m"), "modules")
+  output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
 
-  if(any(!dir.exists(fs::path(output_dir,layers)))){
-
-    purrr::walk(fs::path(output_dir,layers), dir.create, recursive = TRUE)
-
+  if (any(!dir.exists(fs::path(output_dir, layers)))) {
+    purrr::walk(fs::path(output_dir, layers), dir.create, recursive = TRUE)
   }
 
   #--- check outputs ---#
   raw_dem_dir <- file.path(output_dir, "dem_raw")
 
-  if(!dir.exists(file.path(raw_dem_dir))){
-
+  if (!dir.exists(file.path(raw_dem_dir))) {
     dir.create(raw_dem_dir, recursive = TRUE)
-
   }
 
 
   ## Convert to Saga format for processing ---------------------------------------
   sDTM <- fs::path(raw_dem_dir, "demraw.sdat")
 
-  if(!file.exists(sDTM)){
+  if (!file.exists(sDTM)) {
     terra::writeRaster(dtm, sDTM, overwrite = TRUE)
     cli::cli_alert_success(
       "Input DEM converted to .sdat and written to {.path {raw_dem_dir}}"
     )
-
   } else {
-
-    cli::cli_alert_success( "{sDTM} already exists"
-    )
+    cli::cli_alert_success("{sDTM} already exists")
   }
 
 
@@ -224,60 +214,52 @@ create_covariates <- function(dtm = NULL,
   # This version of the module is designed to work on large data sets (e.g. LIDAR data), with smaller datasets you might like to check out the fully featured standard version of the module.
 
   if ("sinksfilled" %in% layers) {
+    sinksfilled <- fs::path(output_dir, "sinksfilled", "sinksfilled.sgrd")
 
-    sinksfilled <- fs::path(output_dir,"sinksfilled","sinksfilled.sgrd" )
-
-    if(!file.exists(sinksfilled)){
-
-      sysCMD <- paste(saga_path, "ta_preprocessor 5", "-ELEV" ,
-                      sDTM,
-                      "-FILLED", sinksfilled,
-                      "-MINSLOPE ", 0.1
+    if (!file.exists(sinksfilled)) {
+      sysCMD <- paste(
+        saga_path, "ta_preprocessor 5", "-ELEV",
+        sDTM,
+        "-FILLED", sinksfilled,
+        "-MINSLOPE ", 0.1
       )
       system(sysCMD)
-
     }
-
   }
 
 
   # Generate sink drainage route detection layer to use in preprocess DEM
-  #http://www.saga-gis.org/saga_tool_doc/2.2.2/ta_preprocessor_1.html
+  # http://www.saga-gis.org/saga_tool_doc/2.2.2/ta_preprocessor_1.html
 
   if ("sinkroute" %in% layers) {
+    sinkroute <- fs::path(output_dir, "sinkroute", "sinkroute.sgrd")
 
-    sinkroute <- fs::path(output_dir,"sinkroute","sinkroute.sgrd")
-
-    if(!file.exists(sinkroute)){
-
-      sysCMD <- paste(saga_path, "ta_preprocessor 1",
-                      "-ELEVATION" , sDTM,
-                      "-SINKROUTE", sinkroute
-
+    if (!file.exists(sinkroute)) {
+      sysCMD <- paste(
+        saga_path, "ta_preprocessor 1",
+        "-ELEVATION", sDTM,
+        "-SINKROUTE", sinkroute
       )
       system(sysCMD)
-
     }
   }
 
   # preproces DEM version 2:  fills sinks (input requires DEM + sink detection layer
   # generated above)/
-  #http://www.saga-gis.org/saga_tool_doc/2.2.2/ta_preprocessor_2.html
+  # http://www.saga-gis.org/saga_tool_doc/2.2.2/ta_preprocessor_2.html
 
 
   if ("dem_preproc" %in% layers) {
+    dem_preproc <- fs::path(output_dir, "dem_preproc", "dem_preproc.sgrd")
 
-    dem_preproc <- fs::path(output_dir,"dem_preproc","dem_preproc.sgrd")
-
-    if(!file.exists(dem_preproc)){
-
-      sysCMD <- paste(saga_path, "ta_preprocessor 2",
-                      "-DEM" , sDTM,
-                      "-SINKROUTE", sinkroute,
-                      "-DEM_PREPROC", dem_preproc,
-                      "-METHOD", 1,
-                      "-THRESHOLD", 0
-
+    if (!file.exists(dem_preproc)) {
+      sysCMD <- paste(
+        saga_path, "ta_preprocessor 2",
+        "-DEM", sDTM,
+        "-SINKROUTE", sinkroute,
+        "-DEM_PREPROC", dem_preproc,
+        "-METHOD", 1,
+        "-THRESHOLD", 0
       )
       system(sysCMD)
     }
@@ -287,24 +269,23 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_morphometry_0.html
 
   if ("slope_aspect_curve" %in% layers) {
-
-    slope <- fs::path(output_dir,"slope_aspect_curve","slope.sgrd")
-    aspect <- fs::path(output_dir,"slope_aspect_curve","aspect.sgrd")
-    gencurve <- fs::path(output_dir,"slope_aspect_curve","gencurve.sgrd")
-    totcurve <- fs::path(output_dir,"slope_aspect_curve","totcurve.sgrd")
+    slope <- fs::path(output_dir, "slope_aspect_curve", "slope.sgrd")
+    aspect <- fs::path(output_dir, "slope_aspect_curve", "aspect.sgrd")
+    gencurve <- fs::path(output_dir, "slope_aspect_curve", "gencurve.sgrd")
+    totcurve <- fs::path(output_dir, "slope_aspect_curve", "totcurve.sgrd")
     ls <- c(slope, aspect, gencurve, totcurve)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 0", "-ELEVATION",
-                      dem_preproc,
-                      "-SLOPE", slope,
-                      "-ASPECT", aspect,                     # Outputs
-                      "-C_GENE", gencurve,
-                      "-C_TOTA", totcurve,                # Outputs
-                      "-METHOD", 6,
-                      "-UNIT_SLOPE", 0,
-                      "-UNIT_ASPECT", 0       # Default Parameters
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 0", "-ELEVATION",
+        dem_preproc,
+        "-SLOPE", slope,
+        "-ASPECT", aspect, # Outputs
+        "-C_GENE", gencurve,
+        "-C_TOTA", totcurve, # Outputs
+        "-METHOD", 6,
+        "-UNIT_SLOPE", 0,
+        "-UNIT_ASPECT", 0 # Default Parameters
       )
       system(sysCMD)
     }
@@ -314,15 +295,14 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_hydrology_0.html
 
   if ("tcatchment" %in% layers) {
+    tcatchment <- fs::path(output_dir, "tcatchment", "tcatchment.sgrd")
 
-    tcatchment <- fs::path(output_dir,"tcatchment","tcatchment.sgrd")
-
-    if(!file.exists(tcatchment)){
-
-      sysCMD <- paste(saga_path, "ta_hydrology 0", "-ELEVATION",
-                      dem_preproc,
-                      "-FLOW", tcatchment,                                    # Output
-                      "-METHOD", 4                                            # Default Parameters
+    if (!file.exists(tcatchment)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 0", "-ELEVATION",
+        dem_preproc,
+        "-FLOW", tcatchment, # Output
+        "-METHOD", 4 # Default Parameters
       )
       system(sysCMD)
     }
@@ -342,22 +322,21 @@ create_covariates <- function(dtm = NULL,
   ##### >> 3a -- Total Catchment Area --------------------------------------
 
   if ("tca" %in% layers) {
-
-    tca <- fs::path(output_dir,"tca","tca1.sgrd")
-    flowlength4 <- fs::path(output_dir,"tca","flowlength1.sgrd")
+    tca <- fs::path(output_dir, "tca", "tca1.sgrd")
+    flowlength4 <- fs::path(output_dir, "tca", "flowlength1.sgrd")
     ls <- c(tca, flowlength4)
 
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_hydrology 1",
-                      "-ELEVATION",
-                      dem_preproc,
-                      # file.path(gsub("sdat","sgrd", sDTM)),
-                      "-FLOW", tca,
-                      "-FLOW_LENGTH", flowlength4,
-                      "-FLOW_UNIT", 1,
-                      "-METHOD", 3
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 1",
+        "-ELEVATION",
+        dem_preproc,
+        # file.path(gsub("sdat","sgrd", sDTM)),
+        "-FLOW", tca,
+        "-FLOW_LENGTH", flowlength4,
+        "-FLOW_UNIT", 1,
+        "-METHOD", 3
       )
       system(sysCMD)
     }
@@ -367,36 +346,33 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_hydrology_19.html
 
   if ("scatchment" %in% layers) {
+    scatchment <- fs::path(output_dir, "scatchment", "scatchment.sgrd")
 
-    scatchment <- fs::path(output_dir,"scatchment","scatchment.sgrd")
-
-    if(!file.exists(scatchment)){
-
-      sysCMD <- paste(saga_path, "ta_hydrology 19", "-DEM", dem_preproc,       # Input from 1
-                      "-SCA", scatchment,                                     # Output
-                      "-TCA", tcatchment,                                     # Input from 2
-                      "-METHOD", 1                                            # Parameters
+    if (!file.exists(scatchment)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 19", "-DEM", dem_preproc, # Input from 1
+        "-SCA", scatchment, # Output
+        "-TCA", tcatchment, # Input from 2
+        "-METHOD", 1 # Parameters
       )
       system(sysCMD)
     }
-
   }
 
   ##### >> 5 -- Topographic Wetness Index --------------------------------
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_hydrology_20.html
 
   if ("twi" %in% layers) {
+    twi <- fs::path(output_dir, "twi", "twi.sgrd")
 
-    twi <- fs::path(output_dir,"twi","twi.sgrd")
-
-    if(!file.exists(twi)){
-
-      sysCMD <- paste(saga_path, "ta_hydrology 20",
-                      "-SLOPE", slope,           # Input from 11
-                      "-AREA", scatchment,                                    # Input from 3
-                      "-TWI", twi,                                            # Output
-                      "-CONV",1,
-                      "-METHOD", 1
+    if (!file.exists(twi)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 20",
+        "-SLOPE", slope, # Input from 11
+        "-AREA", scatchment, # Input from 3
+        "-TWI", twi, # Output
+        "-CONV", 1,
+        "-METHOD", 1
       )
       system(sysCMD)
     }
@@ -407,19 +383,18 @@ create_covariates <- function(dtm = NULL,
   # https://sourceforge.net/projects/saga-gis/files/SAGA%20-%20Documentation/SAGA%20Documents/SagaManual.pdf/download
 
   if ("channelsnetwork" %in% layers) {
+    channelsnetwork <- fs::path(output_dir, "channelsnetwork", "channelsnetwork.sgrd")
 
-    channelsnetwork <- fs::path(output_dir,"channelsnetwork","channelsnetwork.sgrd")
-
-    if(!file.exists(channelsnetwork)){
-
-      sysCMD <- paste(saga_path, "ta_channels 0",
-                      "-ELEVATION", dem_preproc,     # Input from 1
-                      "-CHNLNTWRK", channelsnetwork,                            # Output
-                      "-INIT_GRID", tcatchment,                                 # Input from 2
-                      "-INIT_VALUE", 1000000,
-                      "-INIT_METHOD", 2,                # Based on SAGA Manual Documentation, p. 119
-                      "-DIV_CELLS", 5.0,
-                      "-MINLEN", 10.0                        # Default Parameters
+    if (!file.exists(channelsnetwork)) {
+      sysCMD <- paste(
+        saga_path, "ta_channels 0",
+        "-ELEVATION", dem_preproc, # Input from 1
+        "-CHNLNTWRK", channelsnetwork, # Output
+        "-INIT_GRID", tcatchment, # Input from 2
+        "-INIT_VALUE", 1000000,
+        "-INIT_METHOD", 2, # Based on SAGA Manual Documentation, p. 119
+        "-DIV_CELLS", 5.0,
+        "-MINLEN", 10.0 # Default Parameters
       )
       system(sysCMD)
     }
@@ -430,21 +405,20 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_channels_4.html
 
   if ("overlandflow" %in% layers) {
-
-    hdistance <- fs::path(output_dir,"overlandflow","hdist.sgrd")
-    vdistance<- fs::path(output_dir,"overlandflow","vdist.sgrd")
+    hdistance <- fs::path(output_dir, "overlandflow", "hdist.sgrd")
+    vdistance <- fs::path(output_dir, "overlandflow", "vdist.sgrd")
 
     ls <- c(hdistance, vdistance)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_channels 4",
-                      "-ELEVATION", dem_preproc,        # Input from 1
-                      "-CHANNELS", channelsnetwork,     # Input from 4
-                      "-DISTANCE", hdistance,
-                      "-DISTVERT", vdistance,           # Outputs
-                      "-METHOD", 1,
-                      "-BOUNDARY", 1                              # Parameters
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_channels 4",
+        "-ELEVATION", dem_preproc, # Input from 1
+        "-CHANNELS", channelsnetwork, # Input from 4
+        "-DISTANCE", hdistance,
+        "-DISTVERT", vdistance, # Outputs
+        "-METHOD", 1,
+        "-BOUNDARY", 1 # Parameters
       )
       system(sysCMD)
     }
@@ -454,21 +428,20 @@ create_covariates <- function(dtm = NULL,
   # metrics cannot be calculated)
 
   if ("overlandflow2" %in% layers) {
-
-    hdistancenob <-  fs::path(output_dir,"overlandflow2","hdistnob.sgrd")
-    vdistancenob  <- fs::path(output_dir,"overlandflow2","vdistnob.sgrd")
+    hdistancenob <- fs::path(output_dir, "overlandflow2", "hdistnob.sgrd")
+    vdistancenob <- fs::path(output_dir, "overlandflow2", "vdistnob.sgrd")
 
     ls <- c(hdistancenob, vdistancenob)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_channels 4",
-                      "-ELEVATION", dem_preproc,   # Input from 1
-                      "-CHANNELS", channelsnetwork,                             # Input from 4
-                      "-DISTANCE", hdistancenob,
-                      "-DISTVERT", vdistancenob,           # Outputs
-                      "-METHOD", 1,
-                      "-BOUNDARY", 0                              # Parameters
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_channels 4",
+        "-ELEVATION", dem_preproc, # Input from 1
+        "-CHANNELS", channelsnetwork, # Input from 4
+        "-DISTANCE", hdistancenob,
+        "-DISTVERT", vdistancenob, # Outputs
+        "-METHOD", 1,
+        "-BOUNDARY", 0 # Parameters
       )
       system(sysCMD)
     }
@@ -478,28 +451,27 @@ create_covariates <- function(dtm = NULL,
   ##### >> 8 -- MRVBF -----------------------------------------------------
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_morphometry_8.html
   if ("multiresflatness" %in% layers) {
-
-    MRVBF <-  fs::path(output_dir,"multiresflatness","mrvbf.sgrd")
-    MRRTF  <- fs::path(output_dir,"multiresflatness","mrrtf.sgrd")
+    MRVBF <- fs::path(output_dir, "multiresflatness", "mrvbf.sgrd")
+    MRRTF <- fs::path(output_dir, "multiresflatness", "mrrtf.sgrd")
 
     ls <- c(MRVBF, MRRTF)
 
-    if(all(!file.exists(ls))){
-
+    if (all(!file.exists(ls))) {
       # use defaul parameters
-      sysCMD <- paste(saga_path, "ta_morphometry 8", "-DEM",
-                      # file.path(gsub("sdat","sgrd", sDTM)),
-                      dem_preproc,
-                      "-MRVBF", MRVBF,
-                      "-MRRTF", MRRTF,                       # Outputs
-                      "-T_SLOPE", 16,
-                      "-T_PCTL_V", 0.4,
-                      "-T_PCTL_R", 0.35,    # Default Parameters
-                      "-P_SLOPE", 4.0,
-                      "-P_PCTL", 3.0,
-                      "-UPDATE", 0,
-                      "-CLASSIFY", 0,
-                      "-MAX_RES", 100
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 8", "-DEM",
+        # file.path(gsub("sdat","sgrd", sDTM)),
+        dem_preproc,
+        "-MRVBF", MRVBF,
+        "-MRRTF", MRRTF, # Outputs
+        "-T_SLOPE", 16,
+        "-T_PCTL_V", 0.4,
+        "-T_PCTL_R", 0.35, # Default Parameters
+        "-P_SLOPE", 4.0,
+        "-P_PCTL", 3.0,
+        "-UPDATE", 0,
+        "-CLASSIFY", 0,
+        "-MAX_RES", 100
       )
       system(sysCMD)
     }
@@ -511,28 +483,27 @@ create_covariates <- function(dtm = NULL,
   # use dem_preproces for input and lowered the slope parameter from 15 to 10
   #
   if ("multiresflatness2" %in% layers) {
-
-    MRVBF2 <-  fs::path(output_dir,"multiresflatness2","mrvbf2.sgrd")
-    MRRTF2  <- fs::path(output_dir,"multiresflatness2","mrrtf2.sgrd")
+    MRVBF2 <- fs::path(output_dir, "multiresflatness2", "mrvbf2.sgrd")
+    MRRTF2 <- fs::path(output_dir, "multiresflatness2", "mrrtf2.sgrd")
 
     ls <- c(MRVBF2, MRRTF2)
 
-    if(all(!file.exists(ls))){
-
+    if (all(!file.exists(ls))) {
       #  Adjust parameters -  Option 2.
-      sysCMD <- paste(saga_path, "ta_morphometry 8", "-DEM",
-                      # file.path(gsub("sdat","sgrd", sDTM)),
-                      dem_preproc,
-                      "-MRVBF", MRVBF2,
-                      "-MRRTF", MRRTF2,
-                      "-T_SLOPE", 10,
-                      "-T_PCTL_V", 0.4,
-                      "-T_PCTL_R", 0.35,
-                      "-P_SLOPE", 4.0,
-                      "-P_PCTL", 3.0,
-                      "-UPDATE", 0,
-                      "-CLASSIFY", 0,
-                      "-MAX_RES", 100
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 8", "-DEM",
+        # file.path(gsub("sdat","sgrd", sDTM)),
+        dem_preproc,
+        "-MRVBF", MRVBF2,
+        "-MRRTF", MRRTF2,
+        "-T_SLOPE", 10,
+        "-T_PCTL_V", 0.4,
+        "-T_PCTL_R", 0.35,
+        "-P_SLOPE", 4.0,
+        "-P_PCTL", 3.0,
+        "-UPDATE", 0,
+        "-CLASSIFY", 0,
+        "-MAX_RES", 100
       )
       system(sysCMD)
     }
@@ -588,17 +559,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_morphometry_16.html
 
   if ("tri" %in% layers) {
+    tri <- fs::path(output_dir, "tri", "tri.sgrd")
 
-    tri <- fs::path(output_dir,"tri","tri.sgrd")
-
-    if(!file.exists(tri)){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 16",
-                      "-DEM", dem_preproc,
-                      "-TRI", tri,  # Output
-                      "-MODE", 0,
-                      "-RADIUS", 3.0,
-                      "-DW_WEIGHTING", 0          # Parameters
+    if (!file.exists(tri)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 16",
+        "-DEM", dem_preproc,
+        "-TRI", tri, # Output
+        "-MODE", 0,
+        "-RADIUS", 3.0,
+        "-DW_WEIGHTING", 0 # Parameters
       )
       system(sysCMD)
     }
@@ -609,16 +579,15 @@ create_covariates <- function(dtm = NULL,
 
 
   if ("convergence" %in% layers) {
+    convergence <- fs::path(output_dir, "convergence", "convergence.sgrd")
 
-    convergence <- fs::path(output_dir,"convergence","convergence.sgrd")
-
-    if(!file.exists(convergence)){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 1",
-                      "-ELEVATION ", dem_preproc,
-                      "-RESULT", convergence,                                 # Output
-                      "-METHOD", 1,
-                      "-NEIGHBOURS", 1                          # Parameters
+    if (!file.exists(convergence)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 1",
+        "-ELEVATION ", dem_preproc,
+        "-RESULT", convergence, # Output
+        "-METHOD", 1,
+        "-NEIGHBOURS", 1 # Parameters
       )
       system(sysCMD)
     }
@@ -628,22 +597,21 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_lighting_5.html
 
   if ("openness" %in% layers) {
-
-    opos <- fs::path(output_dir,"openness","open_pos.sgrd")
-    oneg <- fs::path(output_dir,"openness","open_neg.sgrd")
+    opos <- fs::path(output_dir, "openness", "open_pos.sgrd")
+    oneg <- fs::path(output_dir, "openness", "open_neg.sgrd")
 
     ls <- c(opos, oneg)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_lighting 5", "-DEM",
-                      dem_preproc,
-                      "-POS", opos,
-                      "-NEG", oneg,                               # Outputs
-                      "-RADIUS", 1000,
-                      "-METHOD", 0,
-                      "-DLEVEL",  3,
-                      "-NDIRS", 8
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_lighting 5", "-DEM",
+        dem_preproc,
+        "-POS", opos,
+        "-NEG", oneg, # Outputs
+        "-RADIUS", 1000,
+        "-METHOD", 0,
+        "-DLEVEL", 3,
+        "-NDIRS", 8
       )
       system(sysCMD)
     }
@@ -653,18 +621,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_morphometry_12.html
 
   if ("dah" %in% layers) {
+    dah <- fs::path(output_dir, "dah", "dah.sgrd")
 
-    dah <- fs::path(output_dir,"dah","dah.sgrd")
-
-    if(!file.exists(dah)){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 12", "-DEM",
-                      dem_preproc,
-                      "-DAH", dah,                                            # Output
-                      "-ALPHA_MAX", 202.5                                     # Default Parameters
+    if (!file.exists(dah)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 12", "-DEM",
+        dem_preproc,
+        "-DAH", dah, # Output
+        "-ALPHA_MAX", 202.5 # Default Parameters
       )
       system(sysCMD)
-
     }
   }
 
@@ -680,22 +646,21 @@ create_covariates <- function(dtm = NULL,
 
 
   if ("tpi" %in% layers) {
+    tpi <- fs::path(output_dir, "tpi", "tpi.sgrd")
 
-    tpi <- fs::path(output_dir,"tpi","tpi.sgrd")
 
-
-    if(!file.exists(tpi)){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 18",
-                      "-DEM", dem_preproc,
-                      "-TPI", tpi,                                            # Output
-                      "-STANDARD", 0,
-                      "-RADIUS_MIN", 0,
-                      "-RADIUS_MAX", 100,   # Default Parameters
-                      "-DW_WEIGHTING", 0,
-                      "-DW_IDW_POWER", 1,
-                      #"-DW_IDW_OFFSET", "1", # NO LONGER A PARAMETER IN SAGA v8.4.1
-                      "-DW_BANDWIDTH", 75
+    if (!file.exists(tpi)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 18",
+        "-DEM", dem_preproc,
+        "-TPI", tpi, # Output
+        "-STANDARD", 0,
+        "-RADIUS_MIN", 0,
+        "-RADIUS_MAX", 100, # Default Parameters
+        "-DW_WEIGHTING", 0,
+        "-DW_IDW_POWER", 1,
+        # "-DW_IDW_OFFSET", "1", # NO LONGER A PARAMETER IN SAGA v8.4.1
+        "-DW_BANDWIDTH", 75
       )
       system(sysCMD)
     }
@@ -707,22 +672,21 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_channels_7.html
 
   if ("ridgevalley" %in% layers) {
-
-    val_depth <- fs::path(output_dir,"ridgevalley","val_depth.sgrd")
-    ridgelevel <- fs::path(output_dir,"ridgevalley","rid_level.sgrd")
+    val_depth <- fs::path(output_dir, "ridgevalley", "val_depth.sgrd")
+    ridgelevel <- fs::path(output_dir, "ridgevalley", "rid_level.sgrd")
 
 
     ls <- c(val_depth, ridgelevel)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_channels 7",
-                     "-ELEVATION", dem_preproc,            # input DEM
-                     "-VALLEY_DEPTH", val_depth,         # output Valley Depth
-                     "-RIDGE_LEVEL", ridgelevel,           # output Ridge Level
-                     "-THRESHOLD", 1,
-                     "-NOUNDERGROUND", 1,
-                     "-ORDER", 4
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_channels 7",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-VALLEY_DEPTH", val_depth, # output Valley Depth
+        "-RIDGE_LEVEL", ridgelevel, # output Ridge Level
+        "-THRESHOLD", 1,
+        "-NOUNDERGROUND", 1,
+        "-ORDER", 4
       )
       system(sysCMD)
     }
@@ -733,20 +697,19 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_23.html
 
   if ("mrn" %in% layers) {
-
-    mrncatchment <- fs::path(output_dir,"mrn","mrn_area.sgrd")
-    mrnmaxheight <- fs::path(output_dir,"mrn","mrn_mheight.sgrd")
-    mrn <- fs::path(output_dir,"mrn","mrn.sgrd")
+    mrncatchment <- fs::path(output_dir, "mrn", "mrn_area.sgrd")
+    mrnmaxheight <- fs::path(output_dir, "mrn", "mrn_mheight.sgrd")
+    mrn <- fs::path(output_dir, "mrn", "mrn.sgrd")
 
     ls <- c(mrncatchment, mrnmaxheight, mrn)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_hydrology 23",
-                     "-DEM", dem_preproc,                 # input DEM
-                     "-AREA", mrncatchment,               # output MRN Catchment
-                     "-ZMAX", mrnmaxheight,               # output MRN Max Height
-                     "-MRN", mrn                          # output MRN
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 23",
+        "-DEM", dem_preproc, # input DEM
+        "-AREA", mrncatchment, # output MRN Catchment
+        "-ZMAX", mrnmaxheight, # output MRN Max Height
+        "-MRN", mrn # output MRN
       )
       system(sysCMD)
     }
@@ -756,23 +719,22 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_2.html
 
   if ("flowaccumulation" %in% layers) {
-
-    flowaccumft <- fs::path(output_dir,"flowaccumulation","flow_accum_ft.sgrd")
-    meanovcatch <- fs::path(output_dir,"flowaccumulation","meanovcatch.sgrd")
-    accummaterial <- fs::path(output_dir,"flowaccumulation","accummaterial.sgrd")
+    flowaccumft <- fs::path(output_dir, "flowaccumulation", "flow_accum_ft.sgrd")
+    meanovcatch <- fs::path(output_dir, "flowaccumulation", "meanovcatch.sgrd")
+    accummaterial <- fs::path(output_dir, "flowaccumulation", "accummaterial.sgrd")
 
     ls <- c(flowaccumft, meanovcatch, accummaterial)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_hydrology 2",
-                     "-ELEVATION", dem_preproc,            # input DEM
-                     "-FLOW", flowaccumft,                 # output Flow Accumulation
-                     "-VAL_MEAN", meanovcatch,             # output Mean over Catchment
-                     "-ACCU_TOTAL", accummaterial,         # output Accumulated Material
-                     "-FLOW_UNIT", 1,
-                     "-METHOD", 1,
-                     "-MINDQV", 0
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 2",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-FLOW", flowaccumft, # output Flow Accumulation
+        "-VAL_MEAN", meanovcatch, # output Mean over Catchment
+        "-ACCU_TOTAL", accummaterial, # output Accumulated Material
+        "-FLOW_UNIT", 1,
+        "-METHOD", 1,
+        "-MINDQV", 0
       )
       system(sysCMD)
     }
@@ -783,13 +745,13 @@ create_covariates <- function(dtm = NULL,
 
   if ("slopelength" %in% layers) {
     #
-    slopelength <- fs::path(output_dir,"slopelength","slength.sgrd")
+    slopelength <- fs::path(output_dir, "slopelength", "slength.sgrd")
 
-    if(!file.exists(slopelength)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 7",
-                     "-DEM", dem_preproc,             # input DEM
-                     "-LENGTH", slopelength            # output Slope Length
+    if (!file.exists(slopelength)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 7",
+        "-DEM", dem_preproc, # input DEM
+        "-LENGTH", slopelength # output Slope Length
       )
       system(sysCMD)
     }
@@ -801,16 +763,15 @@ create_covariates <- function(dtm = NULL,
   # # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_29.html
 
   if ("flowaccumulation2" %in% layers) {
+    flowaccump <- fs::path(output_dir, "flowaccumulation2", "flow_accum_p.sgrd")
 
-    flowaccump <- fs::path(output_dir,"flowaccumulation2","flow_accum_p.sgrd")
-
-    if(!file.exists(flowaccump)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 29",
-                     "-DEM", dem_preproc,                  # input DEM
-                     "-FLOW", flowaccump,                  # output Flow Accumulation
-                     "-METHOD", 2,
-                     "-CONVERGENCE", 1.1
+    if (!file.exists(flowaccump)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 29",
+        "-DEM", dem_preproc, # input DEM
+        "-FLOW", flowaccump, # output Flow Accumulation
+        "-METHOD", 2,
+        "-CONVERGENCE", 1.1
       )
       system(sysCMD)
     }
@@ -820,27 +781,26 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_0.html
 
   if ("flowaccumulation3" %in% layers) {
-
-    flowaccumtd <- fs::path(output_dir,"flowaccumulation3","flow_accum_td.sgrd")
-    meanovcatchTD <- fs::path(output_dir,"flowaccumulation3","meanovcatchTD.sgrd")
-    accummaterialTD <- fs::path(output_dir,"flowaccumulation3","accummaterialTD.sgrd")
-    flowpathlenTD <- fs::path(output_dir,"flowaccumulation3","flowpathlenTD.sgrd")
+    flowaccumtd <- fs::path(output_dir, "flowaccumulation3", "flow_accum_td.sgrd")
+    meanovcatchTD <- fs::path(output_dir, "flowaccumulation3", "meanovcatchTD.sgrd")
+    accummaterialTD <- fs::path(output_dir, "flowaccumulation3", "accummaterialTD.sgrd")
+    flowpathlenTD <- fs::path(output_dir, "flowaccumulation3", "flowpathlenTD.sgrd")
 
     ls <- c(flowaccumtd, meanovcatchTD, accummaterialTD, flowpathlenTD)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_hydrology 0",
-                     "-ELEVATION", dem_preproc,                 # input DEM
-                     "-FLOW", flowaccumtd,                      # output Flow Accumulation
-                     "-VAL_MEAN", meanovcatchTD,                # output Mean over Catchment
-                     "-ACCU_TOTAL", accummaterialTD,            # output Accumulated Material
-                     "-FLOW_LENGTH", flowpathlenTD,             # output Flow Path Length
-                     "-FLOW_UNIT", 1,
-                     "-METHOD", 4,
-                     "-LINEAR_DO", 1,
-                     "-LINEAR_MIN", 500,
-                     "-CONVERGENCE", 1.1
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 0",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-FLOW", flowaccumtd, # output Flow Accumulation
+        "-VAL_MEAN", meanovcatchTD, # output Mean over Catchment
+        "-ACCU_TOTAL", accummaterialTD, # output Accumulated Material
+        "-FLOW_LENGTH", flowpathlenTD, # output Flow Path Length
+        "-FLOW_UNIT", 1,
+        "-METHOD", 4,
+        "-LINEAR_DO", 1,
+        "-LINEAR_MIN", 500,
+        "-CONVERGENCE", 1.1
       )
       system(sysCMD)
     }
@@ -866,15 +826,14 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_27.html
 
   if ("flowpathlength" %in% layers) {
+    flowpathlength <- fs::path(output_dir, "flowpathlength", "max_fp_l.sgrd")
 
-    flowpathlength <- fs::path(output_dir,"flowpathlength","max_fp_l.sgrd")
-
-    if(!file.exists(flowpathlength)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 27",
-                     "-ELEVATION", dem_preproc,            # input DEM
-                     "-DISTANCE", flowpathlength,          # output Max Flow Path Length
-                     "-DIRECTION", 0
+    if (!file.exists(flowpathlength)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 27",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-DISTANCE", flowpathlength, # output Max Flow Path Length
+        "-DIRECTION", 0
       )
       system(sysCMD)
     }
@@ -885,15 +844,14 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_27.html
   #
   if ("flowpathlength2" %in% layers) {
+    flowpathlength2 <- fs::path(output_dir, "flowpathlength2", "max_fp_l2.sgrd")
 
-    flowpathlength2 <- fs::path(output_dir,"flowpathlength2","max_fp_l2.sgrd")
-
-    if(!file.exists(flowpathlength2)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 27",
-                     "-ELEVATION", dem_preproc,            # input DEM
-                     "-DISTANCE", flowpathlength2,          # output Max Flow Path Length
-                     "-DIRECTION", 1
+    if (!file.exists(flowpathlength2)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 27",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-DISTANCE", flowpathlength2, # output Max Flow Path Length
+        "-DIRECTION", 1
       )
       system(sysCMD)
     }
@@ -903,17 +861,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_26.html
 
   if ("flowpathlength3" %in% layers) {
+    flowpathlength3 <- fs::path(output_dir, "flowpathlength3", "max_fp_l3.sgrd")
 
-    flowpathlength3 <- fs::path(output_dir,"flowpathlength3","max_fp_l3.sgrd")
-
-    if(!file.exists(flowpathlength3)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 26",
-                     "-DEM", dem_preproc,               # input DEM
-                     "-FLOW", flowpathlength3,                # output Flow Accumulation
-                     "-SLOPE_MIN", 0,
-                     "-SLOPE_MAX", 5,
-                     "-B_FLOW", 0
+    if (!file.exists(flowpathlength3)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 26",
+        "-DEM", dem_preproc, # input DEM
+        "-FLOW", flowpathlength3, # output Flow Accumulation
+        "-SLOPE_MIN", 0,
+        "-SLOPE_MAX", 5,
+        "-B_FLOW", 0
       )
       system(sysCMD)
     }
@@ -923,19 +880,18 @@ create_covariates <- function(dtm = NULL,
 
 
   if ("lsfactor" %in% layers) {
+    lsfactor <- fs::path(output_dir, "lsfactor", "ls_factor.sgrd")
 
-    lsfactor <- fs::path(output_dir,"lsfactor","ls_factor.sgrd")
-
-    if(!file.exists(lsfactor)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 22",
-                     "-SLOPE", slope,                # input Slope
-                     "-AREA", tcatchment,            # input Catchment Area
-                     "-LS", lsfactor,                # output LS Factor
-                     "-CONV", 0,
-                     "-METHOD", 0,
-                     "-EROSIVITY", 1,
-                     "-STABILITY", 0
+    if (!file.exists(lsfactor)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 22",
+        "-SLOPE", slope, # input Slope
+        "-AREA", tcatchment, # input Catchment Area
+        "-LS", lsfactor, # output LS Factor
+        "-CONV", 0,
+        "-METHOD", 0,
+        "-EROSIVITY", 1,
+        "-STABILITY", 0
       )
       system(sysCMD)
     }
@@ -946,36 +902,35 @@ create_covariates <- function(dtm = NULL,
   #### >> 24 -- Solar covariates  -----------------------------------------
   # solar direct and diffuse solar radiation
   # adjust min and max limits to 4am and 22 pm to reduce processing time
-  #http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_lighting_2.html
-  #Calculation of potential incoming solar radiation (insolation). Times of sunrise/sunset will only be calculated if time span is set to single day.
+  # http://www.saga-gis.org/saga_tool_doc/7.2.0/ta_lighting_2.html
+  # Calculation of potential incoming solar radiation (insolation). Times of sunrise/sunset will only be calculated if time span is set to single day.
   if ("solarrad" %in% layers) {
-
-    DirInsol <- fs::path(output_dir,"solarrad","direinso.sgrd")
-    DifInsol <- fs::path(output_dir,"solarrad","diffinso.sgrd")
+    DirInsol <- fs::path(output_dir, "solarrad", "direinso.sgrd")
+    DifInsol <- fs::path(output_dir, "solarrad", "diffinso.sgrd")
 
     ls <- c(DirInsol, DifInsol)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD <- paste(saga_path, "ta_lighting 2",
-                      "-GRD_DEM",
-                      # file.path(gsub("sdat","sgrd", sDTM)),# Input DTM
-                      dem_preproc,
-                      "-GRD_DIRECT", DirInsol,
-                      "-GRD_DIFFUS", DifInsol,       # Outputs
-                      "-SOLARCONST", 1367,
-                      "-LOCALSVF", 1,
-                      "-SHADOW", 0,      # Parameters
-                      "-LOCATION", 1,
-                      "-PERIOD", 2,
-                      "-DAY", "2018-02-15",
-                      "-DAY_STOP", "2019-02-15",
-                      "-DAYS_STEP", 30,
-                      "-HOUR_RANGE_MIN", 4,
-                      "-HOUR_RANGE_MAX", 22,
-                      "-HOUR_STEP", 0.5,
-                      "-METHOD", 2,
-                      "-LUMPED", 70
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_lighting 2",
+        "-GRD_DEM",
+        # file.path(gsub("sdat","sgrd", sDTM)),# Input DTM
+        dem_preproc,
+        "-GRD_DIRECT", DirInsol,
+        "-GRD_DIFFUS", DifInsol, # Outputs
+        "-SOLARCONST", 1367,
+        "-LOCALSVF", 1,
+        "-SHADOW", 0, # Parameters
+        "-LOCATION", 1,
+        "-PERIOD", 2,
+        "-DAY", "2018-02-15",
+        "-DAY_STOP", "2019-02-15",
+        "-DAYS_STEP", 30,
+        "-HOUR_RANGE_MIN", 4,
+        "-HOUR_RANGE_MAX", 22,
+        "-HOUR_STEP", 0.5,
+        "-METHOD", 2,
+        "-LUMPED", 70
       )
       system(sysCMD)
     }
@@ -985,22 +940,21 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_21.html
 
   if ("convexity" %in% layers) {
+    convexity <- fs::path(output_dir, "convexity", "convexity.sgrd")
 
-    convexity <- fs::path(output_dir,"convexity","convexity.sgrd")
-
-    if(!file.exists(convexity)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 21",
-                     "-DEM", dem_preproc,                   # input DEM
-                     "-CONVEXITY", convexity,               # output Convexity
-                     "-KERNEL", 0,
-                     "-TYPE", 0,
-                     "-EPSILON", 0,
-                     "-SCALE", 10,
-                     "-METHOD", 1,
-                     "-DW_WEIGHTING", 0,
-                     "-DW_IDW_POWER", 2,
-                     "-DW_BANDWIDTH", 1
+    if (!file.exists(convexity)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 21",
+        "-DEM", dem_preproc, # input DEM
+        "-CONVEXITY", convexity, # output Convexity
+        "-KERNEL", 0,
+        "-TYPE", 0,
+        "-EPSILON", 0,
+        "-SCALE", 10,
+        "-METHOD", 1,
+        "-DW_WEIGHTING", 0,
+        "-DW_IDW_POWER", 2,
+        "-DW_BANDWIDTH", 1
       )
       system(sysCMD)
     }
@@ -1010,17 +964,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_channels_3.html
 
   if ("vertdistance" %in% layers) {
+    vertdistance <- fs::path(output_dir, "vertdistance", "vert_dis.sgrd")
 
-    vertdistance <- fs::path(output_dir,"vertdistance","vert_dis.sgrd")
-
-    if(!file.exists(vertdistance)){
-
-      sysCMD = paste(saga_path, "ta_channels 3",
-                     "-ELEVATION", dem_preproc,            # input DEM
-                     "-CHANNELS", channelsnetwork,         # input Channel Network
-                     "-DISTANCE", vertdistance,            # output
-                     "-THRESHOLD", 1,
-                     "-NOUNDERGROUND", 1
+    if (!file.exists(vertdistance)) {
+      sysCMD <- paste(
+        saga_path, "ta_channels 3",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-CHANNELS", channelsnetwork, # input Channel Network
+        "-DISTANCE", vertdistance, # output
+        "-THRESHOLD", 1,
+        "-NOUNDERGROUND", 1
       )
       system(sysCMD)
     }
@@ -1031,15 +984,14 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_24.html
 
   if ("tci_low" %in% layers) {
+    tci_low <- fs::path(output_dir, "tci_low", "tci_low.sgrd")
 
-    tci_low <- fs::path(output_dir,"tci_low","tci_low.sgrd")
-
-    if(!file.exists(tci_low)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 24",
-                     "-DISTANCE", vertdistance,            # input Vertical Distance to Channel Network
-                     "-TWI", twi,                          # input TWI
-                     "-TCILOW", tci_low                     # output TCI Low
+    if (!file.exists(tci_low)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 24",
+        "-DISTANCE", vertdistance, # input Vertical Distance to Channel Network
+        "-TWI", twi, # input TWI
+        "-TCILOW", tci_low # output TCI Low
       )
       system(sysCMD)
     }
@@ -1049,28 +1001,27 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_hydrology_15.html
 
   if ("swi" %in% layers) {
-
-    catchmentarea <- fs::path(output_dir,"swi","swi_area.sgrd")
-    catchmentslope <- fs::path(output_dir,"swi","swi_slope.sgrd")
-    modcatchmentarea <- fs::path(output_dir,"swi","swi_area_mod.sgrd")
-    topowetindex <- fs::path(output_dir,"swi","swi_twi.sgrd")
+    catchmentarea <- fs::path(output_dir, "swi", "swi_area.sgrd")
+    catchmentslope <- fs::path(output_dir, "swi", "swi_slope.sgrd")
+    modcatchmentarea <- fs::path(output_dir, "swi", "swi_area_mod.sgrd")
+    topowetindex <- fs::path(output_dir, "swi", "swi_twi.sgrd")
 
     ls <- c(catchmentarea, catchmentslope, modcatchmentarea, topowetindex)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_hydrology 15",
-                     "-DEM", dem_preproc,                 # input DEM
-                     "-AREA", catchmentarea,              # output Catchment Area
-                     "-SLOPE", catchmentslope,            # output Catchment Slope
-                     "-AREA_MOD",modcatchmentarea,       # output Modified Catchment Area
-                     "-TWI", topowetindex,                # output TWI
-                     "-SUCTION", 10,
-                     "-AREA_TYPE", 1,
-                     "-SLOPE_TYPE", 1,
-                     "-SLOPE_MIN", 0,
-                     "-SLOPE_OFF", 0.1,
-                     "-SLOPE_WEIGHT", 1
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 15",
+        "-DEM", dem_preproc, # input DEM
+        "-AREA", catchmentarea, # output Catchment Area
+        "-SLOPE", catchmentslope, # output Catchment Slope
+        "-AREA_MOD", modcatchmentarea, # output Modified Catchment Area
+        "-TWI", topowetindex, # output TWI
+        "-SUCTION", 10,
+        "-AREA_TYPE", 1,
+        "-SLOPE_TYPE", 1,
+        "-SLOPE_MIN", 0,
+        "-SLOPE_OFF", 0.1,
+        "-SLOPE_WEIGHT", 1
       )
       system(sysCMD)
     }
@@ -1080,16 +1031,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_27.html
 
   if ("windexp" %in% layers) {
-    windexp <- fs::path(output_dir,"windexp","wind_exp_index.sgrd")
+    windexp <- fs::path(output_dir, "windexp", "wind_exp_index.sgrd")
 
-    if(!file.exists(windexp)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 27",
-                     "-DEM", dem_preproc,                     # input DEM
-                     "-EXPOSITION", windexp,                  # output Wind Exposition Index
-                     "-MAXDIST", 300,
-                     "-STEP", 15,
-                     "-ACCEL", 1.5
+    if (!file.exists(windexp)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 27",
+        "-DEM", dem_preproc, # input DEM
+        "-EXPOSITION", windexp, # output Wind Exposition Index
+        "-MAXDIST", 300,
+        "-STEP", 15,
+        "-ACCEL", 1.5
       )
       system(sysCMD)
     }
@@ -1099,20 +1050,19 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_20.html
 
   if ("texture" %in% layers) {
+    texture <- fs::path(output_dir, "texture", "texture.sgrd")
 
-    texture <- fs::path(output_dir,"texture","texture.sgrd")
-
-    if(!file.exists(texture)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 20",
-                     "-DEM", dem_preproc,                      # input DEM
-                     "-TEXTURE", texture,                      # output Terrain Surface Texture
-                     "-EPSILON", 1,
-                     "-SCALE", 10,
-                     "-METHOD", 1,
-                     "-DW_WEIGHTING", 0,
-                     "-DW_IDW_POWER", 2,
-                     "-DW_BANDWIDTH", 1
+    if (!file.exists(texture)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 20",
+        "-DEM", dem_preproc, # input DEM
+        "-TEXTURE", texture, # output Terrain Surface Texture
+        "-EPSILON", 1,
+        "-SCALE", 10,
+        "-METHOD", 1,
+        "-DW_WEIGHTING", 0,
+        "-DW_IDW_POWER", 2,
+        "-DW_BANDWIDTH", 1
       )
       system(sysCMD)
     }
@@ -1122,15 +1072,14 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_7.html
 
   if ("protection" %in% layers) {
+    protection <- fs::path(output_dir, "protection", "protection.sgrd")
 
-    protection <- fs::path(output_dir,"protection","protection.sgrd")
-
-    if(!file.exists(protection)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 7",
-                     "-DEM", dem_preproc,                        # input DEM
-                     "-PROTECTION", protection,                  # output Morphometric Protection Index
-                     "-RADIUS", 2000
+    if (!file.exists(protection)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 7",
+        "-DEM", dem_preproc, # input DEM
+        "-PROTECTION", protection, # output Morphometric Protection Index
+        "-RADIUS", 2000
       )
       system(sysCMD)
     }
@@ -1141,18 +1090,17 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_17.html
 
   if ("vrm" %in% layers) {
+    vrm <- fs::path(output_dir, "vrm", "vrm.sgrd")
 
-    vrm <- fs::path(output_dir,"vrm","vrm.sgrd")
-
-    if(!file.exists(vrm)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 17",
-                     "-DEM", dem_preproc,                      # input DEM
-                     "-VRM", vrm,                              # output Vector Ruggedness Measure
-                     "-MODE", 1,
-                     "-DW_WEIGHTING", 0,
-                     "-DW_IDW_POWER", 2,
-                     "-DW_BANDWIDTH", 1
+    if (!file.exists(vrm)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 17",
+        "-DEM", dem_preproc, # input DEM
+        "-VRM", vrm, # output Vector Ruggedness Measure
+        "-MODE", 1,
+        "-DW_WEIGHTING", 0,
+        "-DW_IDW_POWER", 2,
+        "-DW_BANDWIDTH", 1
       )
       system(sysCMD)
     }
@@ -1162,18 +1110,17 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_10.html
 
   if ("mbi" %in% layers) {
+    mbi <- fs::path(output_dir, "mbi", "mbi.sgrd")
 
-    mbi <- fs::path(output_dir,"mbi","mbi.sgrd")
-
-    if(!file.exists(mbi)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 10",
-                     "-DEM", dem_preproc,                 # input DEM
-                     "-HREL", vertdistance,               # input Vertical Distance to Channel Network
-                     "-MBI", mbi,                         # output Mass Balance Index
-                     "-TSLOPE", 15,
-                     "-TCURVE", 0.01,
-                     "-THREL", 15
+    if (!file.exists(mbi)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 10",
+        "-DEM", dem_preproc, # input DEM
+        "-HREL", vertdistance, # input Vertical Distance to Channel Network
+        "-MBI", mbi, # output Mass Balance Index
+        "-TSLOPE", 15,
+        "-TCURVE", 0.01,
+        "-THREL", 15
       )
       system(sysCMD)
     }
@@ -1183,17 +1130,16 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_28.html
 
   if ("mscale_tpi" %in% layers) {
+    mscale_tpi <- fs::path(output_dir, "mscale_tpi", "mscale_tpi.sgrd")
 
-    mscale_tpi <- fs::path(output_dir,"mscale_tpi","mscale_tpi.sgrd")
-
-    if(!file.exists(mscale_tpi)){
-
-      sysCMD = paste(saga_path, "ta_morphometry 28",
-                     "-DEM", dem_preproc,                # input DEM
-                     "-TPI", mscale_tpi,                        # output tpi
-                     "-SCALE_MIN", 1,
-                     "-SCALE_MAX", 8,
-                     "-SCALE_NUM", 3
+    if (!file.exists(mscale_tpi)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 28",
+        "-DEM", dem_preproc, # input DEM
+        "-TPI", mscale_tpi, # output tpi
+        "-SCALE_MIN", 1,
+        "-SCALE_MAX", 8,
+        "-SCALE_NUM", 3
       )
       system(sysCMD)
     }
@@ -1203,27 +1149,26 @@ create_covariates <- function(dtm = NULL,
   # http://www.saga-gis.org/saga_tool_doc/7.6.0/ta_morphometry_14.html
 
   if ("relposition" %in% layers) {
-
-    slopeheight <- fs::path(output_dir,"relposition","slope_height.sgrd")
-    valleydepth <- fs::path(output_dir,"relposition","valleydepth.sgrd") #don't need this as created above?
-    normheight <- fs::path(output_dir,"relposition","norm_height.sgrd")
-    standheight <- fs::path(output_dir,"relposition","stand_height.sgrd")
-    msposition <- fs::path(output_dir,"relposition","ms_position.sgrd")
+    slopeheight <- fs::path(output_dir, "relposition", "slope_height.sgrd")
+    valleydepth <- fs::path(output_dir, "relposition", "valleydepth.sgrd") # don't need this as created above?
+    normheight <- fs::path(output_dir, "relposition", "norm_height.sgrd")
+    standheight <- fs::path(output_dir, "relposition", "stand_height.sgrd")
+    msposition <- fs::path(output_dir, "relposition", "ms_position.sgrd")
 
     ls <- c(slopeheight, valleydepth, normheight, standheight, msposition)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_morphometry 14",
-                     "-DEM", dem_preproc,                 # input DEM
-                     "-HO", slopeheight,                  # output Slope Height
-                     "-HU", valleydepth,                  # output Valley Depth
-                     "-NH", normheight,                   # output Normalized Height
-                     "-SH", standheight,                  # output Standardized Height
-                     "-MS", msposition,                   # output Mid-Slope Position
-                     "-W", 0.5,
-                     "-T", 10,
-                     "-E", 2
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 14",
+        "-DEM", dem_preproc, # input DEM
+        "-HO", slopeheight, # output Slope Height
+        "-HU", valleydepth, # output Valley Depth
+        "-NH", normheight, # output Normalized Height
+        "-SH", standheight, # output Standardized Height
+        "-MS", msposition, # output Mid-Slope Position
+        "-W", 0.5,
+        "-T", 10,
+        "-E", 2
       )
       system(sysCMD)
     }
@@ -1259,25 +1204,24 @@ create_covariates <- function(dtm = NULL,
   #### >> 37 -- Upslope and Downslope Curvature ---------------------
 
   if ("slopecurvatures" %in% layers) {
-
-    localcurve <- fs::path(output_dir,"slopecurvatures","local_curv.sgrd")
-    upslopecurve <- fs::path(output_dir,"slopecurvatures","upslope_curv.sgrd")
-    localupcurve <- fs::path(output_dir,"slopecurvatures","local_upslope_curv.sgrd")
-    downcurve <- fs::path(output_dir,"slopecurvatures","down_curv.sgrd")
-    localdowncurve <- fs::path(output_dir,"slopecurvatures","local_downslope_curv.sgrd")
+    localcurve <- fs::path(output_dir, "slopecurvatures", "local_curv.sgrd")
+    upslopecurve <- fs::path(output_dir, "slopecurvatures", "upslope_curv.sgrd")
+    localupcurve <- fs::path(output_dir, "slopecurvatures", "local_upslope_curv.sgrd")
+    downcurve <- fs::path(output_dir, "slopecurvatures", "down_curv.sgrd")
+    localdowncurve <- fs::path(output_dir, "slopecurvatures", "local_downslope_curv.sgrd")
 
     ls <- c(localcurve, upslopecurve, localupcurve, downcurve, localdowncurve)
 
-    if(all(!file.exists(ls))){
-
-      sysCMD = paste(saga_path, "ta_morphometry 26",
-                     "-DEM", dem_preproc,                         # input DEM
-                     "-C_LOCAL", localcurve,                      # output Local Curvature
-                     "-C_UP", upslopecurve,                       # output Upslope Curvature
-                     "-C_UP_LOCAL", localupcurve,                 # output Local Upslope Curvature
-                     "-C_DOWN", downcurve,                        # output Downslope Curvature
-                     "-C_DOWN_LOCAL", localdowncurve,             # output Local Downslope Curvature
-                     "-WEIGHTING", 0.5
+    if (all(!file.exists(ls))) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 26",
+        "-DEM", dem_preproc, # input DEM
+        "-C_LOCAL", localcurve, # output Local Curvature
+        "-C_UP", upslopecurve, # output Upslope Curvature
+        "-C_UP_LOCAL", localupcurve, # output Local Upslope Curvature
+        "-C_DOWN", downcurve, # output Downslope Curvature
+        "-C_DOWN_LOCAL", localdowncurve, # output Local Downslope Curvature
+        "-WEIGHTING", 0.5
       )
       system(sysCMD)
     }
@@ -1288,49 +1232,38 @@ create_covariates <- function(dtm = NULL,
 
 
   if ("steepestslope" %in% layers) {
+    steepestslope <- fs::path(output_dir, "steepestslope", "steepest_slope.sgrd")
 
-    steepestslope <- fs::path(output_dir,"steepestslope","steepest_slope.sgrd")
-
-    if(!file.exists(steepestslope)){
-
-      sysCMD <- paste(saga_path, "ta_morphometry 0",
-                      "-ELEVATION", dem_preproc,                              # input DEM
-                      "-SLOPE", steepestslope,                                # output Steepest Slope
-                      "-METHOD", 1,                                           # method 1 - steepest slope
-                      "-UNIT_SLOPE", 0,
-                      "-UNIT_ASPECT", 0
+    if (!file.exists(steepestslope)) {
+      sysCMD <- paste(
+        saga_path, "ta_morphometry 0",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-SLOPE", steepestslope, # output Steepest Slope
+        "-METHOD", 1, # method 1 - steepest slope
+        "-UNIT_SLOPE", 0,
+        "-UNIT_ASPECT", 0
       )
       system(sysCMD)
     }
-
   }
 
   # #### >> 39 -- Upslope Area -------------------------------------
   # http://www.saga-gis.org/saga_tool_doc/7.6.2/ta_hydrology_4.html
 
   if ("upslopearea" %in% layers) {
+    upslopearea <- fs::path(output_dir, "upslopearea", "upslopearea.sgrd")
 
-    upslopearea <- fs::path(output_dir,"upslopearea","upslopearea.sgrd")
-
-    if(!file.exists(upslopearea)){
-
-      sysCMD = paste(saga_path, "ta_hydrology 4",
-                     "-ELEVATION", dem_preproc,           # input DEM
-                     "-SINKROUTE", sinkroute,
-                     "-AREA", upslopearea,                # output Upslope Area
-                     "-METHOD", 2,
-                     "-CONVERGE", 1.1
+    if (!file.exists(upslopearea)) {
+      sysCMD <- paste(
+        saga_path, "ta_hydrology 4",
+        "-ELEVATION", dem_preproc, # input DEM
+        "-SINKROUTE", sinkroute,
+        "-AREA", upslopearea, # output Upslope Area
+        "-METHOD", 2,
+        "-CONVERGE", 1.1
       )
       system(sysCMD)
     }
-
   }
-  #return(TRUE)
+  # return(TRUE)
 }
-
-
-
-
-
-
-
