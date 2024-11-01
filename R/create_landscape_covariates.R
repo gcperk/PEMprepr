@@ -19,7 +19,29 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' #  # start testing
+#' #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
+#' #  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
+#' #  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+#' #  layers = "all"
+#' #  # end testing
+#' #--- load in dem and write to tempfile ---#
+#' aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
+#' aoi_raw <- sf::st_read(aoi_raw)
+#' aoi <- PEMprepr::aoi_snap(aoi_raw, "shrink")
+#' t25 <- create_template(aoi, 25)
+#' trim_raw <- cded_raster(aoi)
+#' trim <- terra::rast(trim_raw)
+#' dtm <- terra::project(trim, t25)
+#' tmp <- tempfile(fileext = ".tif")
+#' writeRaster(dtm, tmp)
 #'
+#'
+#' #--- create all SAGA covariates ---#
+#' create_samplr_covariate(dtm = tmp, saga_path = saga_path,
+#' out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel )
+#'}
 create_samplr_covariates <- function(dtm = dtm,
                                      saga_path = NULL,
                                      out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
