@@ -277,22 +277,22 @@ create_landform_classes <- function(dtm,
 
     # define the six classes on the basis of thresholds of tp and slope
     valley <- (tp <= -1)
-    valley[na.omit(valley)] <- 1
+    valley[stats::na.omit(valley)] <- 1
 
     lower.slp <- (tp > -1 & tp <= -0.5)
-    lower.slp[na.omit(lower.slp)] <- 2
+    lower.slp[stats::na.omit(lower.slp)] <- 2
 
     flat.slp <- (tp > -0.5 & tp < 0.5) & (slp <= 5)
-    flat.slp[na.omit(flat.slp)] <- 3
+    flat.slp[stats::na.omit(flat.slp)] <- 3
 
     middle.slp <- (tp > -0.5 & tp < 0.5) & (slp > 5)
-    middle.slp[na.omit(middle.slp)] <- 4
+    middle.slp[stats::na.omit(middle.slp)] <- 4
 
     upper.slp <- (tp > 0.5 & tp <= 1)
-    upper.slp[na.omit(upper.slp)] <- 5
+    upper.slp[stats::na.omit(upper.slp)] <- 5
 
     ridge <- (tp > 1)
-    ridge[na.omit(ridge)] <- 6
+    ridge[stats::na.omit(ridge)] <- 6
 
     # plot(valley, main="Valley", sub="TPI <= -1", cex.main=0.9, cex.sub=0.7, legend=FALSE)
     # plot(lower.slp, main="Lower Slope", sub="-1 < TPI <= -0.5", cex.main=0.9, cex.sub=0.7, legend=FALSE)
@@ -310,34 +310,34 @@ create_landform_classes <- function(dtm,
 
     # define the ten classes on the basis of thresholds of sn, sl, and slope
     canyons <- (sn <= -1) & (ln <= -1)
-    canyons[na.omit(canyons)] <- 1
+    canyons[stats::na.omit(canyons)] <- 1
 
     midslope.dr <- (sn <= -1) & (ln > -1 & ln < 1)
-    midslope.dr[na.omit(midslope.dr)] <- 2
+    midslope.dr[stats::na.omit(midslope.dr)] <- 2
 
     upland.dr <- (sn <= -1) & (ln >= 1)
-    upland.dr[na.omit(upland.dr)] <- 3
+    upland.dr[stats::na.omit(upland.dr)] <- 3
 
     us.valley <- (sn > -1 & sn < 1) & (ln <= -1)
-    us.valley[na.omit(us.valley)] <- 4
+    us.valley[stats::na.omit(us.valley)] <- 4
 
     plains <- (sn > -1 & sn < 1) & (ln > -1 & ln < 1) & (slp <= 5)
-    plains[na.omit(plains)] <- 5
+    plains[stats::na.omit(plains)] <- 5
 
     open.slp <- (sn > -1 & sn < 1) & (ln > -1 & ln < 1) & (slp > 5)
-    open.slp[na.omit(open.slp)] <- 6
+    open.slp[stats::na.omit(open.slp)] <- 6
 
     upper.slp <- (sn > -1 & sn < 1) & (ln >= 1)
-    upper.slp[na.omit(upper.slp)] <- 7
+    upper.slp[stats::na.omit(upper.slp)] <- 7
 
     local.rdg <- (sn >= 1) & (ln <= -1)
-    local.rdg[na.omit(local.rdg)] <- 8
+    local.rdg[stats::na.omit(local.rdg)] <- 8
 
     midslp.rdg <- (sn >= 1) & (ln > -1 & ln < 1)
-    midslp.rdg[na.omit(midslp.rdg)] <- 9
+    midslp.rdg[stats::na.omit(midslp.rdg)] <- 9
 
     mount.top <- (sn >= 1) & (ln >= 1)
-    mount.top[na.omit(mount.top)] <- 10
+    mount.top[stats::na.omit(mount.top)] <- 10
 
     # plot(canyons, main="Canyons\nDeeply Incised Streams", sub="SN: TPI <= -1\nLN: TPI <= -1", cex.main=0.9, cex.sub=0.7, legend=FALSE)
     # plot(midslope.dr, main="Midslope Drainage\nShallow Valleys", sub="SN: TPI <= -1\nLN: -1 < TPI < 1", cex.main=0.9, cex.sub=0.7, legend=FALSE)

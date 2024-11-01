@@ -28,7 +28,8 @@ Imports:
     purrr,
     stringr,
     bcmaps,
-    rlang
+    rlang,
+    spatialEco
 Remotes:
     bcgov/bcmaps
 Encoding: UTF-8
