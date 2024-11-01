@@ -2,40 +2,39 @@
 % Please edit documentation in R/create_covariates.R
 \name{create_covariates}
 \alias{create_covariates}
-\title{Covariate SAGA raster covarates from base digital terrain dataset.}
+\title{Generate digital terrain model derived covariates using SAGA GIS.}
 \usage{
 create_covariates(
   dtm = NULL,
   saga_path = NULL,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
-  layers = "all"
+  layers = "all",
+  tile = FALSE
 )
 }
 \arguments{
-\item{dtm}{a character or file path location to raster with elevation data.
-Outputs will be produced at the same resolution and extent as input dtm}
+\item{dtm}{An \code{SpatRast} object or path to a spatial file (.tif) with digital elevation data.
+Should be a meter based coordinate reference system. location to raster with elevation data.
+Outputs layers will be produced at the same resolution and extent as input dtm}
 
-\item{saga_path}{a character of the file to the SAGA directory on the analysts system.
+\item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
 On linux systems with SAGA GIS installed Use \code{SAGApath = ""}}
 
 \item{out_dir}{file.path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already
 exists they will NOT be overwritten.}
 
-\item{layers}{character vector. Covariates to be created. Default is \code{"all"}
-\itemize{
-\item call \code{PEMprepr::layer_options} for full list.
-}}
+\item{layers}{character vector. Covariates to be created. Default is \code{"all"}.}
+
+\item{tile}{A \code{logical} to define if the dtm needs to be run in tiles.
+Currently placeholder to be developed.}
 }
 \value{
 TRUE
 }
 \description{
-#' Takes a dem and via SAGA GIS generates raster covariates at the resolution of
-the dem.
-}
-\details{
-Depending on your system the path to \code{saga_cmd} may need to be specified.
+Generates suit of dem derived covariates usind SAGA GIS executable file.
+Depending on your system the path to \code{saga_path} may need to be specified.
 }
 \examples{
 \dontrun{
