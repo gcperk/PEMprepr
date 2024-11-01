@@ -20,11 +20,11 @@ Outputs layers will be produced at the same resolution and extent as input dtm}
 \item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
 On linux systems with SAGA GIS installed Use \code{SAGApath = ""}}
 
-\item{out_dir}{file.path. Directory where covariates will be written. If not
+\item{out_dir}{afile.path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already
 exists they will NOT be overwritten.}
 
-\item{layers}{character vector. Covariates to be created. Default is \code{"all"}.}
+\item{layers}{A \code{character} vector. Covariates to be created. Default is \code{"all"}.}
 
 \item{tile}{A \code{logical} to define if the dtm needs to be run in tiles.
 Currently placeholder to be developed.}

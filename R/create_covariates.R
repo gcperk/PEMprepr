@@ -8,10 +8,10 @@
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
 #' @param saga_path a `character` of the file to the SAGA directory on the analysts system.
 #'          On linux systems with SAGA GIS installed Use `SAGApath = ""`
-#' @param out_dir file.path. Directory where covariates will be written. If not
+#' @param out_dir afile.path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
-#' @param layers character vector. Covariates to be created. Default is `"all"`.
+#' @param layers A `character` vector. Covariates to be created. Default is `"all"`.
 #' @param tile A `logical` to define if the dtm needs to be run in tiles.
 #'          Currently placeholder to be developed.
 #'
