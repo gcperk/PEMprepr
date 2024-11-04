@@ -4,6 +4,7 @@
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
 #' @param saga_path saga_path a `character` of the file to the SAGA directory on the analysts system.
+#'      Use [find_saga_path()] function to locate your path.
 #' @param out_dir A `character` string of filepath which points to output location. A default
 #'      location and name are applied in line with standard workflow.
 #' @param layers A `character` vector describing the covariates to be created. By default all three will
@@ -20,27 +21,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' #  # start testing
-#' #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-#' #  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
-#' #  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#' #  layers = "all"
-#' #  # end testing
-#' #--- load in dem and write to tempfile ---#
-#' aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
-#' aoi_raw <- sf::st_read(aoi_raw)
-#' aoi <- PEMprepr::aoi_snap(aoi_raw, "shrink")
-#' t25 <- create_template(aoi, 25)
-#' trim_raw <- cded_raster(aoi)
-#' trim <- terra::rast(trim_raw)
-#' dtm <- terra::project(trim, t25)
-#' tmp <- tempfile(fileext = ".tif")
-#' writeRaster(dtm, tmp)
-#'
-#'
 #' #--- create all SAGA covariates ---#
-#' create_samplr_covariate(dtm = tmp, saga_path = saga_path,
-#' out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel )
+#' create_samplr_covariate(
+#'     dtm = dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
+#'     saga_path = find_saga_path()[3]
+#'     out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel)
 #'}
 create_samplr_covariates <- function(dtm = dtm,
                                      saga_path = NULL,
@@ -66,6 +51,8 @@ create_samplr_covariates <- function(dtm = dtm,
   #                  P_SLOPE = 4.0, P_PCTL = 3.0, UPDATE = 1,
   #                  CLASSIFY = 1, MAX_RES = 100)
   # end testing lines
+
+
 
   #--- dtm ---#
 
