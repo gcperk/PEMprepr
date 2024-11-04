@@ -1,4 +1,4 @@
-# test_that("create_samplr_covariates fails with invalid input", {
+# test_that("create_landscape_covariates fails with invalid input", {
 #
 #   outdir <- withr::local_tempdir()
 #   sp <- "C:/Programs/saga-9.2.0_x64/saga-9.2.0_x64/saga_cmd.exe"

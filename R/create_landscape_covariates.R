@@ -27,7 +27,7 @@
 #'     saga_path = find_saga_path()[3]
 #'     out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel)
 #'}
-create_samplr_covariates <- function(dtm = dtm,
+create_landscape_covariates <- function(dtm = dtm,
                                      saga_path = NULL,
                                      out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                                      layers = c("mrvbf", "dah", "landform"),
