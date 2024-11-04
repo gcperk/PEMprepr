@@ -20,7 +20,8 @@ create_samplr_covariates(
 Should be a meter based coordinate reference system. location to raster with elevation data.
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
-\item{saga_path}{saga_path a \code{character} of the file to the SAGA directory on the analysts system.}
+\item{saga_path}{saga_path a \code{character} of the file to the SAGA directory on the analysts system.
+Use \code{\link[=find_saga_path]{find_saga_path()}} function to locate your path.}
 
 \item{out_dir}{A \code{character} string of filepath which points to output location. A default
 location and name are applied in line with standard workflow.}
@@ -45,26 +46,10 @@ Generate digital terrain model derived covariates for sample plan development us
 }
 \examples{
 \dontrun{
-#  # start testing
-#dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-#  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
-#  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#  layers = "all"
-#  # end testing
-#--- load in dem and write to tempfile ---#
-aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
-aoi_raw <- sf::st_read(aoi_raw)
-aoi <- PEMprepr::aoi_snap(aoi_raw, "shrink")
-t25 <- create_template(aoi, 25)
-trim_raw <- cded_raster(aoi)
-trim <- terra::rast(trim_raw)
-dtm <- terra::project(trim, t25)
-tmp <- tempfile(fileext = ".tif")
-writeRaster(dtm, tmp)
-
-
 #--- create all SAGA covariates ---#
-create_samplr_covariate(dtm = tmp, saga_path = saga_path,
-out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel )
+create_samplr_covariate(
+    dtm = dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
+    saga_path = find_saga_path()[3]
+    out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel)
 }
 }

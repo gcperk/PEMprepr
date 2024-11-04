@@ -18,7 +18,7 @@ Should be a meter based coordinate reference system. location to raster with ele
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
 \item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
-On linux systems with SAGA GIS installed Use \code{SAGApath = ""}}
+Use \code{\link[=find_saga_path]{find_saga_path()}} to locate the approraite saga installation on your machine.}
 
 \item{out_dir}{afile.path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already
@@ -30,7 +30,7 @@ exists they will NOT be overwritten.}
 Currently placeholder to be developed.}
 }
 \value{
-TRUE
+path to the output directory where files are written (invisibly).
 }
 \description{
 Generates suit of dem derived covariates usind SAGA GIS executable file.
@@ -38,25 +38,12 @@ Depending on your system the path to \code{saga_path} may need to be specified.
 }
 \examples{
 \dontrun{
-#  # start testing
-#dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-#  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
-#  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#  layers = "all"
-#  # end testing
-#--- load in dem and write to tempfile ---#
-aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
-aoi_raw <- sf::st_read(aoi_raw)
-aoi <- PEMprepr::aoi_snap(aoi_raw, "shrink")
-t25 <- create_template(aoi, 25)
-trim_raw <- cded_raster(aoi)
-trim <- terra::rast(trim_raw)
-dtm <- terra::project(trim, t25)
-tmp <- tempfile(fileext = ".tif")
-writeRaster(dtm, tmp)
-
-
 #--- create all SAGA covariates ---#
-create_covariates(dtm = tmp, layers = "all", output = dir, SAGApath = SAGApath)
+create_covariates(
+  dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
+  saga_path = find_saga_path[3]
+  layers = "all",
+  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+ )
 }
 }
