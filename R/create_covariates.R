@@ -7,7 +7,7 @@
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
 #' @param saga_path a `character` of the file to the SAGA directory on the analysts system.
-#'          On linux systems with SAGA GIS installed Use `SAGApath = ""`
+#'         Use [find_saga_path()] to locate the approraite saga installation on your machine.
 #' @param out_dir afile.path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
@@ -15,31 +15,18 @@
 #' @param tile A `logical` to define if the dtm needs to be run in tiles.
 #'          Currently placeholder to be developed.
 #'
-#' @return TRUE
+#' @return path to the output directory where files are written (invisibly).
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' #  # start testing
-#' #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-#' #  saga_path = "C:\\Programs\\saga-9.2.0_x64\\saga-9.2.0_x64"
-#' #  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#' #  layers = "all"
-#' #  # end testing
-#' #--- load in dem and write to tempfile ---#
-#' aoi_raw <- system.file("extdata", "aoi.gpkg", package ="PEMprepr")
-#' aoi_raw <- sf::st_read(aoi_raw)
-#' aoi <- PEMprepr::aoi_snap(aoi_raw, "shrink")
-#' t25 <- create_template(aoi, 25)
-#' trim_raw <- cded_raster(aoi)
-#' trim <- terra::rast(trim_raw)
-#' dtm <- terra::project(trim, t25)
-#' tmp <- tempfile(fileext = ".tif")
-#' writeRaster(dtm, tmp)
-#'
-#'
 #' #--- create all SAGA covariates ---#
-#' create_covariates(dtm = tmp, layers = "all", output = dir, SAGApath = SAGApath)
+#' create_covariates(
+#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
+#'   saga_path = find_saga_path[3]
+#'   layers = "all",
+#'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+#'  )
 #'}
 create_covariates <- function(dtm = NULL,
                               saga_path = NULL,
@@ -1265,5 +1252,9 @@ create_covariates <- function(dtm = NULL,
       system(sysCMD)
     }
   }
-  # return(TRUE)
+  cli::cat_line()
+  cli::cli_alert_success(
+    "Layers downloaded and to written to {.path {out_dir}}"
+  )
+  invisible(out_dir)
 }
