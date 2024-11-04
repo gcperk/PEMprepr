@@ -4,7 +4,7 @@
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
 #' @param saga_path saga_path a `character` of the file to the SAGA directory on the analysts system.
-#'      Use [find_saga_path()] function to locate your path.
+#'      Use find_saga_path() function to locate your path.
 #' @param out_dir A `character` string of filepath which points to output location. A default
 #'      location and name are applied in line with standard workflow.
 #' @param layers A `character` vector describing the covariates to be created. By default all three will

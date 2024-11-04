@@ -7,7 +7,7 @@
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
 #' @param saga_path a `character` of the file to the SAGA directory on the analysts system.
-#'         Use [find_saga_path()] to locate the approraite saga installation on your machine.
+#'         Use find_saga_path() to locate the approraite saga installation on your machine.
 #' @param out_dir afile.path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
