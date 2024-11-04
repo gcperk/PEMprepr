@@ -18,7 +18,7 @@ Should be a meter based coordinate reference system. location to raster with ele
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
 \item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
-Use \code{\link[=find_saga_path]{find_saga_path()}} to locate the approraite saga installation on your machine.}
+Use find_saga_path() to locate the approraite saga installation on your machine.}
 
 \item{out_dir}{afile.path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already

@@ -21,7 +21,7 @@ Should be a meter based coordinate reference system. location to raster with ele
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
 \item{saga_path}{saga_path a \code{character} of the file to the SAGA directory on the analysts system.
-Use \code{\link[=find_saga_path]{find_saga_path()}} function to locate your path.}
+Use find_saga_path() function to locate your path.}
 
 \item{out_dir}{A \code{character} string of filepath which points to output location. A default
 location and name are applied in line with standard workflow.}
