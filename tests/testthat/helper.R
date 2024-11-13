@@ -11,6 +11,6 @@ on_linux <- function() tolower(Sys.info()[["sysname"]]) == "linux"
 
 skip_if_no_saga <- function() {
   testthat::skip_if(
-    is.null(getOption("pemprepr.saga_path"))
+    is.null(getOption("pemprepr.saga_path")) && Sys.which("saga_cmd") == ""
   )
 }
