@@ -46,6 +46,12 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install saga
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
