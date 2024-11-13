@@ -23,13 +23,13 @@
 #' #--- create all SAGA covariates ---#
 #' create_covariates(
 #'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
-#'   saga_path = find_saga_path[3]
+#'   saga_path = saga_cmd()
 #'   layers = "all",
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
 #'  )
 #'}
 create_covariates <- function(dtm = NULL,
-                              saga_path = NULL,
+                              saga_path = saga_cmd(),
                               out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                               layers = "all",
                               tile = FALSE # this is placeholder for tiled outputs
@@ -58,21 +58,6 @@ create_covariates <- function(dtm = NULL,
 
   #--- get resolution of dtm ---#
   rn <- terra::res(dtm)[1]
-
-
-  #--- SAGA ---#
-
-  if (!is.null(saga_path)) {
-    check_saga(saga_path)
-    cli::cli_alert_success(
-      "Your SAGA connection has been succesfuly set up. Using the {.var {saga_path}}"
-    )
-  } else {
-    check_saga()
-    cli::cli_abort("{.var saga_path} must point to the saga_path location on your computer.
-                   Please check your program files or equivalent to locate the saga_path.exe file")
-  }
-
 
   #--- out_dir ---#
 
