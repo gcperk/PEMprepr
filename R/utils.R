@@ -70,7 +70,7 @@ saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pem
   if (num_version < "7.6") {
     cli::cli_warn("SAGA-GIS is version {.val {num_version}}; Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
   } else {
-    cli::cli_inform(c("v" = "Using SAGA version {.val {string_version}}"))
+    cli::cli_inform(c("v" = "{.val {string_version}}"))
   }
 
   ._pempreprenv_$saga_path <- saga_path
