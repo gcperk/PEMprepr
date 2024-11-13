@@ -40,23 +40,32 @@ find_saga_path <- function(root = NULL) {
     cli::cli_abort("no matching files found.. please check you have saga installed")
   } else if (length(saga_loc) == 1) {
     saga_path <- saga_loc
-  } else {
+  } else if (interactive()) {
     cli::cat_line()
     prompt <- "Congratulations there are matches, select one of the following for your saga_path"
     choice <- utils::menu(title = prompt, choices = saga_loc)
     saga_path <- saga_loc[choice]
+  } else {
+    cli::cli_abort("Multiple SAGA installations found. Please set the option 'pemprepr.saga_path' to the one you want.")
   }
   saga_cmd(saga_path)
 }
 
 saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)) {
 
+  saga_cmd_string <- if (Sys.info()["sysname"] == "Windows") {
+    "saga_cmd.exe"
+  } else {
+    "saga_cmd"
+  }
+
   # If not specified, check for system saga
-  saga_path <- saga_path %||% Sys.which("saga_cmd")
+  saga_path <- saga_path %||% Sys.which(saga_cmd_string)
 
   if (saga_path == "") {
-    cli::cli_abort("{.var saga_path} must be a path to the SAGA_cmd location on your computer.
-                   Please check your program files or use `find_saga_path()` to locate the saga_cmd.exe file")
+    cli::cli_abort(
+      "{.var saga_path} must be a path to the {saga_cmd_string} location on your computer.
+      Please check your program files or use `find_saga_path()` to locate the {saga_cmd_string} file")
   }
 
   string_version <- system(
@@ -68,7 +77,7 @@ saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pem
     as.numeric_version()
 
   if (num_version < "7.6") {
-    cli::cli_warn("SAGA-GIS is version {.val {num_version}}; Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
+    cli::cli_warn("Using {.val {string_version}}; Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
   } else {
     cli::cli_inform(c("v" = "{.val {string_version}}"))
   }
