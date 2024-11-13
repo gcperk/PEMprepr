@@ -24,10 +24,10 @@ if (!exists("%||%", envir = baseenv())) {
 find_saga_path <- function(root = NULL) {
   # Set root path depending on operating system
   if (is.null(root)) {
-    root <- switch(Sys.info()["sysname"],
-      "Windows" = "C:/",
-      "Darwin" = "/Applications",
-      "Linux" = "/usr"
+    root <- switch(tolower(Sys.info()["sysname"]),
+      "windows" = "C:/",
+      "darwin" = "/Applications",
+      "linux" = "/usr"
     )
   }
 
@@ -53,19 +53,15 @@ find_saga_path <- function(root = NULL) {
 
 saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)) {
 
-  saga_cmd_string <- if (Sys.info()["sysname"] == "Windows") {
-    "saga_cmd.exe"
-  } else {
-    "saga_cmd"
-  }
-
+  saga_cmd_string <- saga_cmd_string()
   # If not specified, check for system saga
   saga_path <- saga_path %||% Sys.which(saga_cmd_string)
 
   if (saga_path == "") {
     cli::cli_abort(
-      "{.var saga_path} must be a path to the {saga_cmd_string} location on your computer.
-      Please check your program files or use `find_saga_path()` to locate the {saga_cmd_string} file")
+      "{.var saga_path} must be a path to the {.val {saga_cmd_string}} location on your computer.
+      Please check your program files or use {.fn find_saga_path} to locate the {.val {saga_cmd_string}} file"
+    )
   }
 
   string_version <- system(
@@ -87,7 +83,13 @@ saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pem
   saga_path
 }
 
-
+saga_cmd_string <- function() {
+  if (tolower(Sys.info()["sysname"]) == "windows") {
+    "saga_cmd.exe"
+  } else {
+    "saga_cmd"
+  }
+}
 
 #' Crop tiles
 #' @family Layers
