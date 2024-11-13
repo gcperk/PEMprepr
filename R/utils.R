@@ -21,59 +21,61 @@ if (!exists("%||%", envir = baseenv())) {
   }
 }
 
-
-
-
 find_saga_path <- function(root = NULL) {
   # Set root path depending on operating system
   if (is.null(root)) {
-    if (Sys.info()["sysname"] == "Windows") {
-      root <- "C:/"
-    } else {
-      root <- "/usr"
-    }
+    root <- switch(Sys.info()["sysname"],
+      "Windows" = "C:/",
+      "Darwin" = "/Applications",
+      "Linux" = "/usr"
+    )
   }
 
-  cli::cli_progress_message("Searching for saga_cmd.exe on your machine...")
+  # browser()
+  cli::cli_progress_message("Searching for saga_cmd on your machine...")
 
-  sloc <- fs::dir_ls(path = root, type = "file", glob = "*saga_cmd.exe", recurse = TRUE, fail = FALSE)
+  saga_loc <- fs::dir_ls(path = root, type = "file", regexp = "saga_cmd(\\.exe)?", recurse = TRUE, fail = FALSE)
 
-
-  if (length(sloc > 0)) {
-    cli::cat_line()
-    cli::cli_alert_success("congratulations there are matches, select one of the following for your saga_path")
-  } else {
+  if (length(saga_loc) == 0) {
     cli::cli_abort("no matching files found.. please check you have saga installed")
+  } else if (length(saga_loc) == 1) {
+    saga_path <- saga_loc
+  } else {
+    cli::cat_line()
+    prompt <- "Congratulations there are matches, select one of the following for your saga_path"
+    choice <- utils::menu(title = prompt, choices = saga_loc)
+    saga_path <- saga_loc[choice]
   }
-
-  print(sloc)
+  saga_cmd(saga_path)
 }
 
+saga_cmd <- function(saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)) {
 
+  # If not specified, check for system saga
+  saga_path <- saga_path %||% Sys.which("saga_cmd")
 
-
-check_saga <- function(saga_path = NULL) {
-  if (is.null(saga_path)) {
+  if (saga_path == "") {
     cli::cli_abort("{.var saga_path} must be a path to the SAGA_cmd location on your computer.
                    Please check your program files or use `find_saga_path()` to locate the saga_cmd.exe file")
   }
 
-  if (Sys.info()["sysname"] == "Windows") {
-    saga_cmd <- fs::path(saga_path)
-    fns <- "\\" ### file name separator
-  } else {
-    saga_cmd <- "saga_cmd"
-    fns <- "/" ### file name separator
-  }
-  z <- system(paste(saga_cmd, "-v"), intern = TRUE) ## prints that SAGA version number -- confirming it works.
-  z <- print(z[1])
-  v <- suppressWarnings(as.numeric(unlist(strsplit(z, "[[:punct:][:space:]]+")[1])))
-  v <- v[!is.na(v)][1:2]
-  v <- as.numeric(paste(v[1], v[2], sep = "."))
+  string_version <- system(
+    paste(saga_path, "-v"),
+    intern = TRUE
+  )[1]
 
-  if (v < 7.6) {
-    warning("SAGA-GIS is less that 7.6.  Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
+  num_version <- stringr::str_extract(string_version, "[-.0-9]{3,10}") |>
+    as.numeric_version()
+
+  if (num_version < "7.6") {
+    cli::cli_warn("SAGA-GIS is version {.val {num_version}}; Not all covariates will generate.  Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
+  } else {
+    cli::cli_inform(c("v" = "Using SAGA version {.val {string_version}}"))
   }
+
+  ._pempreprenv_$saga_path <- saga_path
+
+  saga_path
 }
 
 
