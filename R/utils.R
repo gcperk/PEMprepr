@@ -103,7 +103,7 @@ find_saga_path <- function(root = NULL) {
 #' `getOption("pemprepr.saga_path")`.
 #'
 #' @return path to saga_cmd executable
-#' @seealso [find_saga()]
+#' @seealso [find_saga_path()]
 #' @export
 saga_cmd <- function(
     saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)

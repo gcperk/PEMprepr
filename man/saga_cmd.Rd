@@ -27,5 +27,5 @@ It is recommended to set the option in your \code{.Rprofile} file with:
 will ensure SAGA is always found when it is needed.
 }
 \seealso{
-\code{\link[=find_saga]{find_saga()}}
+\code{\link[=find_saga_path]{find_saga_path()}}
 }
