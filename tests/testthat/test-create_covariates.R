@@ -12,6 +12,8 @@ test_that("create_covariates fails with invalid input", {
 })
 
 test_that("create_covariates() works", {
+  skip_if_no_saga()
+
   outdir <- withr::local_tempdir()
   aoi_snapped <- make_test_aoi(outdir)
   aoi_rast <- create_template_raster(aoi_snapped, res = 50, out_dir = outdir)
