@@ -18,6 +18,6 @@ test_that("create_covariates() works", {
   aoi_snapped <- make_test_aoi(outdir)
   aoi_rast <- create_template_raster(aoi_snapped, res = 50, out_dir = outdir)
 
-  suppressMessages(create_covariates(dtm = aoi_rast, layers = "flowaccumulation", out_dir = outdir))
+  create_covariates(dtm = aoi_rast, layers = "flowaccumulation", out_dir = outdir)
   expect_snapshot(list.files(outdir, recursive = TRUE))
 })
