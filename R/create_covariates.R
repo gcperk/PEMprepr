@@ -122,7 +122,7 @@ create_covariates <- function(dtm = NULL,
   deps <- setdiff(unique(c(moddirs$dep1, moddirs$dep2)), moddirs$module)
   deps <- deps[!grepl("^\\s*$", deps)]
   if (length(deps > 0)) {
-    mods <- c(moddir$module, deps)
+    mods <- c(moddirs$module, deps)
   }
 
 
