@@ -93,7 +93,10 @@ create_covariates <- function(dtm = NULL,
 
   if (isTRUE(layers == "all")) {
     layers <- layer_options
-  }
+  } else {
+      layers <- c("sinksfilled", layers)
+    }
+
 
   # check the layers are correct
   errorl <- setdiff(layers, layer_options)
@@ -1234,6 +1237,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(upslopearea)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 4",
+        "-TARGET", sinksfilled, # target area
         "-ELEVATION", sinksfilled, # input DEM
         "-SINKROUTE", sinkroute,
         "-AREA", upslopearea, # output Upslope Area
