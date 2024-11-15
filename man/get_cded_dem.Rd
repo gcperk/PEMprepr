@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_cded_dem.R
 \name{get_cded_dem}
 \alias{get_cded_dem}
-\title{#' Get Canadian Digital Elevation Data (CDED) to match area of interest}
+\title{Get Canadian Digital Elevation Data (CDED) to match area of interest}
 \usage{
 get_cded_dem(
   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m",
@@ -43,9 +43,10 @@ create_raster_template().
 \dontrun{
 get_cded_dem(
   aoi = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_abs, "25m", "template.tif"),
-  res = FALSE,
+  res = NULL,
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_abs,
-  write_output = TRUE
-  overwrite = FALSE)
+  write_output = TRUE,
+  overwrite = FALSE
+)
 }
 }
