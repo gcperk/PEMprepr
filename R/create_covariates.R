@@ -147,20 +147,12 @@ create_covariates <- function(dtm = NULL,
 
   # OUTPUTS: ------------------------------------------------------------
 
-  #--- check outputs ---#
+  #--- Create necessary output directories ---#
   output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
+  
+  raw_dem_dir <- fs::path(output_dir, "dem_raw")
 
-  if (any(!dir.exists(fs::path(output_dir, layers)))) {
-    purrr::walk(fs::path(output_dir, layers), dir.create, recursive = TRUE)
-  }
-
-  #--- check outputs ---#
-  raw_dem_dir <- file.path(output_dir, "dem_raw")
-
-  if (!dir.exists(file.path(raw_dem_dir))) {
-    dir.create(raw_dem_dir, recursive = TRUE)
-  }
-
+  fs::dir_create(c(raw_dem_dir, fs::path(output_dir, layers_to_call)))
 
   ## Convert to Saga format for processing ---------------------------------------
   sDTM <- fs::path(raw_dem_dir, "demraw.sdat")
