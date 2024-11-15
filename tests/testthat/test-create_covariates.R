@@ -16,8 +16,9 @@ test_that("create_covariates() works", {
 
   outdir <- withr::local_tempdir()
   aoi_snapped <- make_test_aoi(outdir)
-  aoi_rast <- create_template_raster(aoi_snapped, res = 50, out_dir = outdir)
+  aoi_rast <- create_template_raster(aoi_snapped, res = 50, write_output = FALSE)
+  dem <- get_cded_dem(aoi_rast, write_output = FALSE, ask = FALSE)
 
-  create_covariates(dtm = aoi_rast, layers = "flowaccumulation", out_dir = outdir)
+  create_covariates(dtm = dem, layers = "flowaccumulation", out_dir = outdir)
   expect_snapshot(list.files(outdir, recursive = TRUE))
 })
