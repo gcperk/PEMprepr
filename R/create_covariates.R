@@ -22,7 +22,7 @@
 #' \dontrun{
 #' #--- create all SAGA covariates ---#
 #' create_covariates(
-#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
+#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
 #'   saga_path = find_saga_path[3]
 #'   layers = "all",
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
@@ -127,7 +127,7 @@ create_covariates <- function(dtm = NULL,
 
 
   # order the modules to be run
-  layers_to_call <- mods[order(match(mods, moddir$module))]
+  layers_to_call <- unique(mods[order(match(mods, moddir$module))])
 
 
   # if tiling is true give a message for artifact covariates
