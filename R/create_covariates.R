@@ -125,7 +125,7 @@ create_covariates <- function(dtm = NULL,
 
 
   # order the modules to be run
-  layers_to_call <- mods[order(match(mods, moddir$module))]
+  layers_to_call <- unique(mods[order(match(mods, moddir$module))])
 
 
   # if tiling is true give a message for artifact covariates
