@@ -22,8 +22,8 @@
 #' \dontrun{
 #' #--- create all SAGA covariates ---#
 #' create_covariates(
-#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
-#'   saga_path = saga_cmd()
+#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
+#'   saga_path = find_saga_path[3]
 #'   layers = "all",
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
 #'  )
@@ -35,14 +35,14 @@ create_covariates <- function(dtm = NULL,
                               tile = FALSE # this is placeholder for tiled outputs
 ) {
   #  # start testing
-  # dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
-  # saga_path = "C:/Program Files/SAGA/saga-9.2.0_x64/saga-9.2.0_x64/saga_path.exe"
-  # out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-  # layers = "all"
+  #dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
+  #saga_path = "C:/Programs/saga-9.2.0_x64/saga-9.2.0_x64/saga_cmd.exe"
+  #out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
+  #layers = "all"
   # tile = FALSE
 
-  moddir <- fs::path_package("PEMprepr", "extdata/saga_module_depends.csv")
-  # moddir <- read.csv("saga_module_depends.csv")
+  #moddir <- fs::path_package("PEMprepr", "extdata/saga_module_depends.csv")
+  #moddir <- read.csv("saga_module_depends.csv")
 
   #  # end testing
 
@@ -100,17 +100,19 @@ create_covariates <- function(dtm = NULL,
 
 
   # check which modules to run and appropriate dependants are also run in order
+  moddir <- utils::read.csv(fs::path_package("PEMprepr", "extdata/saga_module_depends.csv"))
+
   moddirs <- dplyr::filter(moddir, stringr::str_detect(moddir$module, paste(layers, collapse = "|")))
   mods <- moddirs$module
   deps <- setdiff(unique(c(moddirs$dep1, moddirs$dep2)), moddirs$module)
   deps <- deps[!grepl("^\\s*$", deps)]
   if (length(deps > 0)) {
-    mods <- c(moddir$module, deps)
+    mods <- c(moddirs$module, deps)
   }
 
 
   # order the modules to be run
-  layers_to_call <- mods[order(match(mods, moddir$module))]
+  layers_to_call <- unique(mods[order(match(mods, moddir$module))])
 
 
   # if tiling is true give a message for artifact covariates
@@ -250,7 +252,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 0", "-ELEVATION",
-        dem_preproc,
+        sinksfilled,
         "-SLOPE", slope,
         "-ASPECT", aspect, # Outputs
         "-C_GENE", gencurve,
@@ -272,7 +274,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(tcatchment)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 0", "-ELEVATION",
-        dem_preproc,
+        sinksfilled,
         "-FLOW", tcatchment, # Output
         "-METHOD", 4 # Default Parameters
       )
@@ -303,7 +305,7 @@ create_covariates <- function(dtm = NULL,
       sysCMD <- paste(
         saga_path, "ta_hydrology 1",
         "-ELEVATION",
-        dem_preproc,
+        sinksfilled,
         # file.path(gsub("sdat","sgrd", sDTM)),
         "-FLOW", tca,
         "-FLOW_LENGTH", flowlength4,
@@ -322,7 +324,7 @@ create_covariates <- function(dtm = NULL,
 
     if (!file.exists(scatchment)) {
       sysCMD <- paste(
-        saga_path, "ta_hydrology 19", "-DEM", dem_preproc, # Input from 1
+        saga_path, "ta_hydrology 19", "-DEM", sinksfilled, # Input from 1
         "-SCA", scatchment, # Output
         "-TCA", tcatchment, # Input from 2
         "-METHOD", 1 # Parameters
@@ -360,7 +362,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(channelsnetwork)) {
       sysCMD <- paste(
         saga_path, "ta_channels 0",
-        "-ELEVATION", dem_preproc, # Input from 1
+        "-ELEVATION", sinksfilled, # Input from 1
         "-CHNLNTWRK", channelsnetwork, # Output
         "-INIT_GRID", tcatchment, # Input from 2
         "-INIT_VALUE", 1000000,
@@ -385,7 +387,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_channels 4",
-        "-ELEVATION", dem_preproc, # Input from 1
+        "-ELEVATION", sinksfilled, # Input from 1
         "-CHANNELS", channelsnetwork, # Input from 4
         "-DISTANCE", hdistance,
         "-DISTVERT", vdistance, # Outputs
@@ -408,7 +410,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_channels 4",
-        "-ELEVATION", dem_preproc, # Input from 1
+        "-ELEVATION", sinksfilled, # Input from 1
         "-CHANNELS", channelsnetwork, # Input from 4
         "-DISTANCE", hdistancenob,
         "-DISTVERT", vdistancenob, # Outputs
@@ -433,7 +435,7 @@ create_covariates <- function(dtm = NULL,
       sysCMD <- paste(
         saga_path, "ta_morphometry 8", "-DEM",
         # file.path(gsub("sdat","sgrd", sDTM)),
-        dem_preproc,
+        sinksfilled,
         "-MRVBF", MRVBF,
         "-MRRTF", MRRTF, # Outputs
         "-T_SLOPE", 16,
@@ -465,7 +467,7 @@ create_covariates <- function(dtm = NULL,
       sysCMD <- paste(
         saga_path, "ta_morphometry 8", "-DEM",
         # file.path(gsub("sdat","sgrd", sDTM)),
-        dem_preproc,
+        sinksfilled,
         "-MRVBF", MRVBF2,
         "-MRRTF", MRRTF2,
         "-T_SLOPE", 10,
@@ -536,7 +538,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(tri)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 16",
-        "-DEM", dem_preproc,
+        "-DEM", sinksfilled,
         "-TRI", tri, # Output
         "-MODE", 0,
         "-RADIUS", 3.0,
@@ -556,7 +558,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(convergence)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 1",
-        "-ELEVATION ", dem_preproc,
+        "-ELEVATION ", sinksfilled,
         "-RESULT", convergence, # Output
         "-METHOD", 1,
         "-NEIGHBOURS", 1 # Parameters
@@ -577,7 +579,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_lighting 5", "-DEM",
-        dem_preproc,
+        sinksfilled,
         "-POS", opos,
         "-NEG", oneg, # Outputs
         "-RADIUS", 1000,
@@ -598,7 +600,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(dah)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 12", "-DEM",
-        dem_preproc,
+        sinksfilled,
         "-DAH", dah, # Output
         "-ALPHA_MAX", 202.5 # Default Parameters
       )
@@ -624,7 +626,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(tpi)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 18",
-        "-DEM", dem_preproc,
+        "-DEM", sinksfilled,
         "-TPI", tpi, # Output
         "-STANDARD", 0,
         "-RADIUS_MIN", 0,
@@ -653,7 +655,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_channels 7",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-VALLEY_DEPTH", val_depth, # output Valley Depth
         "-RIDGE_LEVEL", ridgelevel, # output Ridge Level
         "-THRESHOLD", 1,
@@ -678,7 +680,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 23",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-AREA", mrncatchment, # output MRN Catchment
         "-ZMAX", mrnmaxheight, # output MRN Max Height
         "-MRN", mrn # output MRN
@@ -700,7 +702,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 2",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-FLOW", flowaccumft, # output Flow Accumulation
         "-VAL_MEAN", meanovcatch, # output Mean over Catchment
         "-ACCU_TOTAL", accummaterial, # output Accumulated Material
@@ -722,7 +724,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(slopelength)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 7",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-LENGTH", slopelength # output Slope Length
       )
       system(sysCMD)
@@ -740,7 +742,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(flowaccump)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 29",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-FLOW", flowaccump, # output Flow Accumulation
         "-METHOD", 2,
         "-CONVERGENCE", 1.1
@@ -763,7 +765,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 0",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-FLOW", flowaccumtd, # output Flow Accumulation
         "-VAL_MEAN", meanovcatchTD, # output Mean over Catchment
         "-ACCU_TOTAL", accummaterialTD, # output Accumulated Material
@@ -803,7 +805,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(flowpathlength)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 27",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-DISTANCE", flowpathlength, # output Max Flow Path Length
         "-DIRECTION", 0
       )
@@ -821,7 +823,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(flowpathlength2)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 27",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-DISTANCE", flowpathlength2, # output Max Flow Path Length
         "-DIRECTION", 1
       )
@@ -838,7 +840,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(flowpathlength3)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 26",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-FLOW", flowpathlength3, # output Flow Accumulation
         "-SLOPE_MIN", 0,
         "-SLOPE_MAX", 5,
@@ -887,7 +889,7 @@ create_covariates <- function(dtm = NULL,
         saga_path, "ta_lighting 2",
         "-GRD_DEM",
         # file.path(gsub("sdat","sgrd", sDTM)),# Input DTM
-        dem_preproc,
+        sinksfilled,
         "-GRD_DIRECT", DirInsol,
         "-GRD_DIFFUS", DifInsol, # Outputs
         "-SOLARCONST", 1367,
@@ -917,7 +919,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(convexity)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 21",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-CONVEXITY", convexity, # output Convexity
         "-KERNEL", 0,
         "-TYPE", 0,
@@ -941,7 +943,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(vertdistance)) {
       sysCMD <- paste(
         saga_path, "ta_channels 3",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-CHANNELS", channelsnetwork, # input Channel Network
         "-DISTANCE", vertdistance, # output
         "-THRESHOLD", 1,
@@ -983,7 +985,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 15",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-AREA", catchmentarea, # output Catchment Area
         "-SLOPE", catchmentslope, # output Catchment Slope
         "-AREA_MOD", modcatchmentarea, # output Modified Catchment Area
@@ -1008,7 +1010,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(windexp)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 27",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-EXPOSITION", windexp, # output Wind Exposition Index
         "-MAXDIST", 300,
         "-STEP", 15,
@@ -1027,7 +1029,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(texture)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 20",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-TEXTURE", texture, # output Terrain Surface Texture
         "-EPSILON", 1,
         "-SCALE", 10,
@@ -1049,7 +1051,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(protection)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 7",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-PROTECTION", protection, # output Morphometric Protection Index
         "-RADIUS", 2000
       )
@@ -1067,7 +1069,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(vrm)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 17",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-VRM", vrm, # output Vector Ruggedness Measure
         "-MODE", 1,
         "-DW_WEIGHTING", 0,
@@ -1087,7 +1089,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(mbi)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 10",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-HREL", vertdistance, # input Vertical Distance to Channel Network
         "-MBI", mbi, # output Mass Balance Index
         "-TSLOPE", 15,
@@ -1107,7 +1109,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(mscale_tpi)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 28",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-TPI", mscale_tpi, # output tpi
         "-SCALE_MIN", 1,
         "-SCALE_MAX", 8,
@@ -1132,7 +1134,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 14",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-HO", slopeheight, # output Slope Height
         "-HU", valleydepth, # output Valley Depth
         "-NH", normheight, # output Normalized Height
@@ -1187,7 +1189,7 @@ create_covariates <- function(dtm = NULL,
     if (all(!file.exists(ls))) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 26",
-        "-DEM", dem_preproc, # input DEM
+        "-DEM", sinksfilled, # input DEM
         "-C_LOCAL", localcurve, # output Local Curvature
         "-C_UP", upslopecurve, # output Upslope Curvature
         "-C_UP_LOCAL", localupcurve, # output Local Upslope Curvature
@@ -1209,7 +1211,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(steepestslope)) {
       sysCMD <- paste(
         saga_path, "ta_morphometry 0",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-SLOPE", steepestslope, # output Steepest Slope
         "-METHOD", 1, # method 1 - steepest slope
         "-UNIT_SLOPE", 0,
@@ -1228,7 +1230,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(upslopearea)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 4",
-        "-ELEVATION", dem_preproc, # input DEM
+        "-ELEVATION", sinksfilled, # input DEM
         "-SINKROUTE", sinkroute,
         "-AREA", upslopearea, # output Upslope Area
         "-METHOD", 2,
