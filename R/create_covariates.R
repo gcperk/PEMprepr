@@ -6,9 +6,9 @@
 #' @param dtm An `SpatRast` object or path to a spatial file (.tif) with digital elevation data.
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
-#' @param saga_path a `character` of the file to the SAGA directory on the analysts system.
-#'         Use find_saga_path() to locate the approraite saga installation on your machine.
-#' @param out_dir afile.path. Directory where covariates will be written. If not
+#' @param saga_path a `character` of the path to the SAGA executable on the analysts system.
+#'         Use [find_saga_path()] to locate the appropriate saga installation on your machine.
+#' @param out_dir a file path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
 #' @param layers A `character` vector. Covariates to be created. Default is `"all"`.
@@ -22,8 +22,8 @@
 #' \dontrun{
 #' #--- create all SAGA covariates ---#
 #' create_covariates(
-#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
-#'   saga_path = find_saga_path[3]
+#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
+#'   saga_path = saga_cmd()
 #'   layers = "all",
 #'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
 #'  )
@@ -43,8 +43,12 @@ create_covariates <- function(dtm = NULL,
 
   #moddir <- fs::path_package("PEMprepr", "extdata/saga_module_depends.csv")
   #moddir <- read.csv("saga_module_depends.csv")
+  # end testing
 
-  #  # end testing
+  if (!fs::file_exists(saga_path)) {
+    cli::cli_abort("Path to SAGA: {.path {saga_path}} does not exist")
+  }
+
 
   #--- dtm ---#
 
