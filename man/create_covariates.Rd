@@ -6,7 +6,7 @@
 \usage{
 create_covariates(
   dtm = NULL,
-  saga_path = NULL,
+  saga_path = saga_cmd(),
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
   layers = "all",
   tile = FALSE
@@ -17,10 +17,10 @@ create_covariates(
 Should be a meter based coordinate reference system. location to raster with elevation data.
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
-\item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
-Use find_saga_path() to locate the approraite saga installation on your machine.}
+\item{saga_path}{a \code{character} of the path to the SAGA executable on the analysts system.
+Use \code{\link[=find_saga_path]{find_saga_path()}} to locate the appropriate saga installation on your machine.}
 
-\item{out_dir}{afile.path. Directory where covariates will be written. If not
+\item{out_dir}{a file path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already
 exists they will NOT be overwritten.}
 
@@ -40,8 +40,8 @@ Depending on your system the path to \code{saga_path} may need to be specified.
 \dontrun{
 #--- create all SAGA covariates ---#
 create_covariates(
-  dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
-  saga_path = find_saga_path[3]
+  dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
+  saga_path = saga_cmd()
   layers = "all",
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
  )
