@@ -97,19 +97,13 @@ saga_cmd <- function(
     )
   }
 
-  string_version <- system(
-    paste(saga_path, "-v"),
-    intern = TRUE
-  )[1]
+  saga_version <- saga_version(saga_path)
 
-  num_version <- stringr::str_extract(string_version, "[-.0-9]{3,10}") |>
-    as.numeric_version()
-
-  if (num_version < "7.6") {
-    cli::cli_warn("Using {.val {string_version}}; Not all covariates will
+  if (saga_version < "7.6") {
+    cli::cli_warn("Using {.val SAGA version {saga_version}}; Not all covariates will
     generate. Upgrade your SAGA, visit https://sourceforge.net/projects/saga-gis/files/")
   } else {
-    cli::cli_inform(c("v" = "{.val {string_version}}"))
+    cli::cli_inform(c("v" = "{.val SAGA version {saga_version}}"))
   }
 
   ._pempreprenv_$saga_path <- saga_path
@@ -123,4 +117,14 @@ saga_cmd_string <- function() {
   } else {
     "saga_cmd"
   }
+}
+
+saga_version <- function(saga_path) {
+  string_version <- system(
+    paste(saga_path, "-v"),
+    intern = TRUE
+  )[1]
+
+  stringr::str_extract(string_version, "[-.0-9]{3,10}") |>
+    as.numeric_version()
 }
