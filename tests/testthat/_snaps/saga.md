@@ -1,4 +1,4 @@
-# saga_cmd warns with insufficient version
+# saga_cmd() warns with insufficient version
 
     Code
       saga_cmd()

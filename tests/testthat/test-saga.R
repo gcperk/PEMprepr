@@ -1,11 +1,11 @@
-test_that("saga_version works", {
+test_that("saga_version() works", {
   skip_if_no_saga()
 
   saga_path <- getOption("pemprepr.saga_path", default = Sys.which("saga_cmd"))
   expect_s3_class(saga_version(saga_path), "numeric_version")
 })
 
-test_that("saga_cmd warns with insufficient version", {
+test_that("saga_cmd() warns with insufficient version", {
   skip_if_no_saga()
 
   local_mocked_bindings(saga_version = function(saga_path) numeric_version("7.2"))
