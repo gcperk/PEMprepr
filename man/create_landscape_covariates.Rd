@@ -47,7 +47,7 @@ Generate digital terrain model derived covariates for sample plan development us
 \examples{
 \dontrun{
 #--- create all SAGA covariates ---#
-create_samplr_covariate(
+create_landscape_covariates(
     dtm = dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
     saga_path = saga_cmd(),
     out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel)
