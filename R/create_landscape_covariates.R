@@ -22,13 +22,13 @@
 #' @examples
 #' \dontrun{
 #' #--- create all SAGA covariates ---#
-#' create_samplr_covariate(
+#' create_landscape_covariates(
 #'     dtm = dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
-#'     saga_path = find_saga_path()[3]
+#'     saga_path = saga_cmd(),
 #'     out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel)
 #'}
 create_landscape_covariates <- function(dtm = dtm,
-                                     saga_path = NULL,
+                                     saga_path = saga_cmd(),
                                      out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                                      layers = c("mrvbf", "dah", "landform"),
                                      sieve_size = 10,
@@ -52,7 +52,9 @@ create_landscape_covariates <- function(dtm = dtm,
   #                  CLASSIFY = 1, MAX_RES = 100)
   # end testing lines
 
-
+  if (!fs::file_exists(saga_path)) {
+    cli::cli_abort("Path to SAGA: {.path {saga_path}} does not exist")
+  }
 
   #--- dtm ---#
 
@@ -67,38 +69,18 @@ create_landscape_covariates <- function(dtm = dtm,
   #--- get resolution of dtm ---#
   rn <- terra::res(dtm)[1]
 
-  #--- SAGA ---#
-
-  if (!is.null(saga_path)) {
-    check_saga(saga_path)
-    cli::cli_alert_success(
-      "Your SAGA connection has been succesfuly set up. Using the {.var {saga_path}}"
-    )
-  } else {
-    check_saga()
-    cli::cli_abort("{.var saga_path} must point to the saga_path location on your computer.
-                   Please check your program files or equivalent to locate the saga_path.exe file")
-  }
-
   #--- out_dir ---#
 
   if (!inherits(out_dir, c("character"))) {
     cli::cli_warn("{.var out_dir} must be  path to a file")
   }
 
-  #--- check outputs ---#
-  output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules_landscape")
+  #--- Create necessary output directories ---#
+  output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
+  
+  raw_dem_dir <- fs::path(output_dir, "dem_raw")
 
-  if (any(!dir.exists(fs::path(output_dir, layers)))) {
-    purrr::walk(fs::path(output_dir, layers), dir.create, recursive = TRUE)
-  }
-
-  #--- check outputs ---#
-  raw_dem_dir <- file.path(output_dir, "dem_raw")
-
-  if (!dir.exists(file.path(raw_dem_dir))) {
-    dir.create(raw_dem_dir, recursive = TRUE)
-  }
+  fs::dir_create(c(raw_dem_dir, fs::path(output_dir, layers)))
 
   ## Convert to Saga format for processing ---------------------------------------
   sDTM <- fs::path(raw_dem_dir, "demraw.sdat")
