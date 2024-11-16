@@ -56,6 +56,8 @@ create_landscape_covariates <- function(dtm = dtm,
     cli::cli_abort("Path to SAGA: {.path {saga_path}} does not exist")
   }
 
+  layers <- match.arg(layers, several.ok = TRUE)
+
   #--- dtm ---#
 
   if (inherits(dtm, c("character"))) {
