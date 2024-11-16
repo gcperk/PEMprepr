@@ -20,14 +20,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' #--- create all SAGA covariates ---#
+#' aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
+#' aoi <- snap_aoi(aoi_file, write_output = FALSE)
+#' template_raster <- create_template_raster(aoi, res = 50, write_output = FALSE)
+#' dem <- get_cded_dem(template_raster, write_output = FALSE)
 #' create_covariates(
-#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif",
-#'   saga_path = saga_cmd()
-#'   layers = "all",
-#'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#'  )
-#'}
+#'   dtm = dem,
+#'   saga_path = saga_cmd(),
+#'   layers = "tcatchment",
+#'   out_dir = tempdir()
+#' )
+#' }
 create_covariates <- function(dtm = NULL,
                               saga_path = saga_cmd(),
                               out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
