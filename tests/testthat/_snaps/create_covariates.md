@@ -54,3 +54,37 @@
       [49] "50m/modules/sinksfilled/sinksfilled.sgrd"                  
       [50] "snap/aoi_snapped.gpkg"                                     
 
+# create_landscape_covariates() works
+
+    Code
+      list.files(outdir, recursive = TRUE)
+    Output
+       [1] "50m/modules/dah/dah.mgrd"                    
+       [2] "50m/modules/dah/dah.prj"                     
+       [3] "50m/modules/dah/dah.sdat"                    
+       [4] "50m/modules/dah/dah.sdat.aux.xml"            
+       [5] "50m/modules/dah/dah.sgrd"                    
+       [6] "50m/modules/dah_LS.tif"                      
+       [7] "50m/modules/dem_raw/demraw.prj"              
+       [8] "50m/modules/dem_raw/demraw.sdat"             
+       [9] "50m/modules/dem_raw/demraw.sdat.aux.xml"     
+      [10] "50m/modules/dem_raw/demraw.sgrd"             
+      [11] "50m/modules/dem_raw/sinksfilled.mgrd"        
+      [12] "50m/modules/dem_raw/sinksfilled.prj"         
+      [13] "50m/modules/dem_raw/sinksfilled.sdat"        
+      [14] "50m/modules/dem_raw/sinksfilled.sdat.aux.xml"
+      [15] "50m/modules/dem_raw/sinksfilled.sgrd"        
+      [16] "50m/modules/landform_LS.tif"                 
+      [17] "50m/modules/mrvbf/mrrtf.mgrd"                
+      [18] "50m/modules/mrvbf/mrrtf.prj"                 
+      [19] "50m/modules/mrvbf/mrrtf.sdat"                
+      [20] "50m/modules/mrvbf/mrrtf.sdat.aux.xml"        
+      [21] "50m/modules/mrvbf/mrrtf.sgrd"                
+      [22] "50m/modules/mrvbf/mrvbf.mgrd"                
+      [23] "50m/modules/mrvbf/mrvbf.prj"                 
+      [24] "50m/modules/mrvbf/mrvbf.sdat"                
+      [25] "50m/modules/mrvbf/mrvbf.sdat.aux.xml"        
+      [26] "50m/modules/mrvbf/mrvbf.sgrd"                
+      [27] "50m/modules/mrvbf_LS.tif"                    
+      [28] "snap/aoi_snapped.gpkg"                       
+
