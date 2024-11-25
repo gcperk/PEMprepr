@@ -152,7 +152,7 @@ create_covariates <- function(dtm = NULL,
 
   #--- Create necessary output directories ---#
   output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
-  
+
   raw_dem_dir <- fs::path(output_dir, "dem_raw")
 
   fs::dir_create(c(raw_dem_dir, fs::path(output_dir, layers_to_call)))
