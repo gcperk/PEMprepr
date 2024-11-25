@@ -6,7 +6,7 @@
 \usage{
 create_covariates(
   dtm = NULL,
-  saga_path = NULL,
+  saga_path = saga_cmd(),
   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
   layers = "all",
   tile = FALSE
@@ -17,10 +17,10 @@ create_covariates(
 Should be a meter based coordinate reference system. location to raster with elevation data.
 Outputs layers will be produced at the same resolution and extent as input dtm}
 
-\item{saga_path}{a \code{character} of the file to the SAGA directory on the analysts system.
-Use find_saga_path() to locate the approraite saga installation on your machine.}
+\item{saga_path}{a \code{character} of the path to the SAGA executable on the analysts system.
+Use \code{\link[=find_saga_path]{find_saga_path()}} to locate the appropriate saga installation on your machine.}
 
-\item{out_dir}{afile.path. Directory where covariates will be written. If not
+\item{out_dir}{a file path. Directory where covariates will be written. If not
 specified uses the default from the \code{fid} folder structure. If files already
 exists they will NOT be overwritten.}
 
@@ -38,12 +38,15 @@ Depending on your system the path to \code{saga_path} may need to be specified.
 }
 \examples{
 \dontrun{
-#--- create all SAGA covariates ---#
+aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
+aoi <- snap_aoi(aoi_file, write_output = FALSE)
+template_raster <- create_template_raster(aoi, res = 50, write_output = FALSE)
+dem <- get_cded_dem(template_raster, write_output = FALSE)
 create_covariates(
-  dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
-  saga_path = find_saga_path[3]
-  layers = "all",
-  out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
- )
+  dtm = dem,
+  saga_path = saga_cmd(),
+  layers = "tcatchment",
+  out_dir = tempdir()
+)
 }
 }

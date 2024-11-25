@@ -6,9 +6,9 @@
 #' @param dtm An `SpatRast` object or path to a spatial file (.tif) with digital elevation data.
 #'      Should be a meter based coordinate reference system. location to raster with elevation data.
 #'      Outputs layers will be produced at the same resolution and extent as input dtm
-#' @param saga_path a `character` of the file to the SAGA directory on the analysts system.
-#'         Use find_saga_path() to locate the approraite saga installation on your machine.
-#' @param out_dir afile.path. Directory where covariates will be written. If not
+#' @param saga_path a `character` of the path to the SAGA executable on the analysts system.
+#'         Use [find_saga_path()] to locate the appropriate saga installation on your machine.
+#' @param out_dir a file path. Directory where covariates will be written. If not
 #'     specified uses the default from the `fid` folder structure. If files already
 #'     exists they will NOT be overwritten.
 #' @param layers A `character` vector. Covariates to be created. Default is `"all"`.
@@ -20,16 +20,19 @@
 #'
 #' @examples
 #' \dontrun{
-#' #--- create all SAGA covariates ---#
+#' aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
+#' aoi <- snap_aoi(aoi_file, write_output = FALSE)
+#' template_raster <- create_template_raster(aoi, res = 50, write_output = FALSE)
+#' dem <- get_cded_dem(template_raster, write_output = FALSE)
 #' create_covariates(
-#'   dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif"),
-#'   saga_path = find_saga_path[3]
-#'   layers = "all",
-#'   out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel
-#'  )
-#'}
+#'   dtm = dem,
+#'   saga_path = saga_cmd(),
+#'   layers = "tcatchment",
+#'   out_dir = tempdir()
+#' )
+#' }
 create_covariates <- function(dtm = NULL,
-                              saga_path = NULL,
+                              saga_path = saga_cmd(),
                               out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel,
                               layers = "all",
                               tile = FALSE # this is placeholder for tiled outputs
@@ -43,8 +46,12 @@ create_covariates <- function(dtm = NULL,
 
   #moddir <- fs::path_package("PEMprepr", "extdata/saga_module_depends.csv")
   #moddir <- read.csv("saga_module_depends.csv")
+  # end testing
 
-  #  # end testing
+  if (!fs::file_exists(saga_path)) {
+    cli::cli_abort("Path to SAGA: {.path {saga_path}} does not exist")
+  }
+
 
   #--- dtm ---#
 
@@ -58,21 +65,6 @@ create_covariates <- function(dtm = NULL,
 
   #--- get resolution of dtm ---#
   rn <- terra::res(dtm)[1]
-
-
-  #--- SAGA ---#
-
-  if (!is.null(saga_path)) {
-    check_saga(saga_path)
-    cli::cli_alert_success(
-      "Your SAGA connection has been succesfuly set up. Using the {.var {saga_path}}"
-    )
-  } else {
-    check_saga()
-    cli::cli_abort("{.var saga_path} must point to the saga_path location on your computer.
-                   Please check your program files or equivalent to locate the saga_path.exe file")
-  }
-
 
   #--- out_dir ---#
 
@@ -104,7 +96,10 @@ create_covariates <- function(dtm = NULL,
 
   if (isTRUE(layers == "all")) {
     layers <- layer_options
-  }
+  } else {
+      layers <- c("sinksfilled", layers)
+    }
+
 
   # check the layers are correct
   errorl <- setdiff(layers, layer_options)
@@ -155,20 +150,12 @@ create_covariates <- function(dtm = NULL,
 
   # OUTPUTS: ------------------------------------------------------------
 
-  #--- check outputs ---#
+  #--- Create necessary output directories ---#
   output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
+  
+  raw_dem_dir <- fs::path(output_dir, "dem_raw")
 
-  if (any(!dir.exists(fs::path(output_dir, layers)))) {
-    purrr::walk(fs::path(output_dir, layers), dir.create, recursive = TRUE)
-  }
-
-  #--- check outputs ---#
-  raw_dem_dir <- file.path(output_dir, "dem_raw")
-
-  if (!dir.exists(file.path(raw_dem_dir))) {
-    dir.create(raw_dem_dir, recursive = TRUE)
-  }
-
+  fs::dir_create(c(raw_dem_dir, fs::path(output_dir, layers_to_call)))
 
   ## Convert to Saga format for processing ---------------------------------------
   sDTM <- fs::path(raw_dem_dir, "demraw.sdat")
@@ -1245,6 +1232,7 @@ create_covariates <- function(dtm = NULL,
     if (!file.exists(upslopearea)) {
       sysCMD <- paste(
         saga_path, "ta_hydrology 4",
+        "-TARGET", sinksfilled, # target area
         "-ELEVATION", sinksfilled, # input DEM
         "-SINKROUTE", sinkroute,
         "-AREA", upslopearea, # output Upslope Area
