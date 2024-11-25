@@ -61,18 +61,7 @@ create_covariates <- function(dtm = NULL,
 
 
   #--- SAGA ---#
-
-  if (!is.null(saga_path)) {
-    check_saga(saga_path)
-    cli::cli_alert_success(
-      "Your SAGA connection has been succesfuly set up. Using the {.var {saga_path}}"
-    )
-  } else {
-    check_saga()
-    cli::cli_abort("{.var saga_path} must point to the saga_path location on your computer.
-                   Please check your program files or equivalent to locate the saga_path.exe file")
-  }
-
+  check_saga(saga_path)
 
   #--- out_dir ---#
 
