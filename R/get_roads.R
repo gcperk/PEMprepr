@@ -7,7 +7,7 @@
 #' @param out_dir A character string of filepath which points to output location. A default
 #'    location and name are applied in line with standard workflow.
 #'
-#' @return An `sf` object with roads information for the given aoi
+#' @return writes out a `sf` object with roads information for the given aoi as "road_network.gpkg"
 #' @export
 #'
 #' @examples
