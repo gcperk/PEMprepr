@@ -16,14 +16,13 @@ applied in line with standard workflow.}
 location and name are applied in line with standard workflow.}
 }
 \value{
-An \code{sf} object with roads information for the given aoi
+writes out a \code{sf} object with roads information for the given aoi as "road_network.gpkg"
 }
 \description{
 #' Generates road layers(roads and forest service roads) in vector format sample planning and modelling using bcdata package
 }
 \examples{
 \dontrun{
-#' ## Load snapped aoi object
 aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 roads <- get_roads(aoi_file, out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs)
 }
