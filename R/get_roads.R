@@ -58,4 +58,5 @@ get_roads <- function(aoi, out_dir) {
     cli::cat_line()
     cli::cli_alert_success("roads layers downloaded and to written to {.path {out_dir}}")
   }
+  return(roads)
 }
