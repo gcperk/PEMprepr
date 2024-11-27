@@ -56,7 +56,7 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   }
 
 
-  if (nrow(roads) > 0 & nrow(fsr) > 0) {
+  if (nrow(roads) > 0 || nrow(fsr) > 0) {
     road_merge <- dplyr::bind_rows(roads, fsr)
     sf::st_write(road_merge, fs::path(out_dir, "road_network.gpkg"), append = FALSE)
     cli::cat_line()
