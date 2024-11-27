@@ -12,16 +12,14 @@
 #'
 #' @examples
 #' \dontrun{
-#' #' ## Load snapped aoi object
 #' aoi_file <- system.file("extdata/datecreek_aoi.gpkg", package = "PEMprepr")
 #' roads <- get_roads(aoi_file, out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs)
 #' }
-get_roads <- function(aoi, out_dir) { #  # The main road network layer has too many roads in it. Filter it down to only
-  # include named roads and combine those with actual mapped FSR's
-
+get_roads <- function(aoi, out_dir) {
   cli::cli_alert_info("Downloading Road network")
+
   roads <- bcdata::bcdc_query_geodata("bb060417-b6e6-4548-b837-f9060d94743e") |>
-    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |> # slightly larger extent
+    bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |>
     bcdata::select("id", "ROAD_NAME_FULL", "ROAD_CLASS", "ROAD_SURFACE", "FEATURE_LENGTH_M") |>
     bcdata::collect() |>
     dplyr::select("id", "ROAD_NAME_FULL", "ROAD_SURFACE", "ROAD_CLASS", "FEATURE_LENGTH_M")
@@ -32,7 +30,6 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
   } else {
     cli::cli_alert_warning("No major roads data available within the study area")
   }
-
 
   fsr <- bcdata::bcdc_query_geodata("9e5bfa62-2339-445e-bf67-81657180c682") |>
     bcdata::filter(bcdata::BBOX(local(sf::st_bbox(aoi)))) |>
@@ -55,13 +52,10 @@ get_roads <- function(aoi, out_dir) { #  # The main road network layer has too m
     cli::cli_alert_warning("No foresty roads data available within the study area")
   }
 
-
   if (nrow(roads) > 0 || nrow(fsr) > 0) {
     road_merge <- dplyr::bind_rows(roads, fsr)
     sf::st_write(road_merge, fs::path(out_dir, "road_network.gpkg"), append = FALSE)
     cli::cat_line()
     cli::cli_alert_success("roads layers downloaded and to written to {.path {out_dir}}")
   }
-
-  # add check for individual layer missing.
 }
