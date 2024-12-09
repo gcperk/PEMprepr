@@ -15,7 +15,7 @@
 #'      define catergories. Default value is `10`.
 #' @param saga_param named list. Parameters that are fed to SAGA MRVBF function. IF supplied it must contain
 #'      all parameters specified in the SAGA command.
-#' @param overwrite. A `logical` value to determine if the output files should be overwritten.
+#' @param overwrite A `logical` value to determine if the output files should be overwritten.
 #'    Default is `TRUE`.
 #' @return path to the output directory where files are written (invisibly).
 #' @export
