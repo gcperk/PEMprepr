@@ -52,21 +52,25 @@ read_crop <- function(f, poly, tmp) {
 
 # Add function to check input SpatRast location or read file
 
-read_spatrast_if_necessary = function(spatRast){
-
+read_spatrast_if_necessary <- function(spatRast) {
   if (inherits(spatRast, c("character"))) {
     spatRast <- terra::rast(spatRast)
-
   } else if (!inherits(spatRast, c("SpatRaster"))) {
     cli::cli_abort("{.var spatRast} must be a SpatRaster or a path to SpatRaster file")
   }
 
   return(spatRast)
-
 }
 
-
-
+# add check function for if input is sf object then read into memory
+read_sf_if_necessary <- function(sf_obj) {
+  if (inherits(sf_obj, c("character"))) {
+    sf_obj <- sf::st_read(sf_obj)
+  } else if (!inherits(sf_obj, c("sf"))) {
+    cli::cli_abort("{.var sf_obj} must be an sf object or a path to an sf object")
+  }
+  return(sf_obj)
+}
 
 
 
