@@ -58,8 +58,7 @@ read_spatrast_if_necessary <- function(spatRast) {
   } else if (!inherits(spatRast, c("SpatRaster"))) {
     cli::cli_abort("{.var spatRast} must be a SpatRaster or a path to SpatRaster file")
   }
-
-  return(spatRast)
+  spatRast
 }
 
 # add check function for if input is sf object then read into memory
@@ -69,13 +68,5 @@ read_sf_if_necessary <- function(sf_obj) {
   } else if (!inherits(sf_obj, c("sf"))) {
     cli::cli_abort("{.var sf_obj} must be an sf object or a path to an sf object")
   }
-  return(sf_obj)
+  sf_obj
 }
-
-
-
-
-
-
-
-
