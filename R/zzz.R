@@ -2,7 +2,8 @@
 
 .onLoad <- function(...) {
   # Check if it's set as an environment variable first. This is undocumented,
-  # 
+  # but the safest path for developers as this is consulted during R CMD check,
+  # but .Rprofile is not
   saga_envvar_path <- if (nzchar(Sys.getenv("SAGA_PATH"))) {
     Sys.getenv("SAGA_PATH")
   } else {
