@@ -15,7 +15,8 @@
 #'      define catergories. Default value is `10`.
 #' @param saga_param named list. Parameters that are fed to SAGA MRVBF function. IF supplied it must contain
 #'      all parameters specified in the SAGA command.
-#'
+#' @param overwrite. A `logical` value to determine if the output files should be overwritten.
+#'    Default is `TRUE`.
 #' @return path to the output directory where files are written (invisibly).
 #' @export
 #'
@@ -37,7 +38,8 @@ create_landscape_covariates <- function(dtm = dtm,
                                        T_SLOPE = 64, TPCTL_V = 6, T_PCTL_R = 2,
                                        P_SLOPE = 4.0, P_PCTL = 3.0, UPDATE = 1,
                                        CLASSIFY = 1, MAX_RES = 100
-                                     )) {
+                                     ),
+                                     overwrite = TRUE ){
   # testing lines
   # dtm = fs::path(PEMprepr::read_fid()$dir_1020_covariates$path_rel,"25m","dem.tif")
   # saga_path = "C:/Programs/saga-9.2.0_x64/saga-9.2.0_x64/saga_cmd.exe"
@@ -144,9 +146,7 @@ create_landscape_covariates <- function(dtm = dtm,
 
   mrvbf_rcrop <- terra::crop(mrvbf_r, dtm)
 
-  terra::writeRaster(mrvbf_rcrop, fs::path(output_dir, "mrvbf_LS.tif"), overwrite = TRUE)
-
-
+  terra::writeRaster(mrvbf_rcrop, fs::path(output_dir, "mrvbf_LS.tif"), overwrite = overwrite)
 
 
   ## 2.  Landscape Diuranal Anisotropic Heating
@@ -191,7 +191,7 @@ create_landscape_covariates <- function(dtm = dtm,
 
     rc_crop <- terra::crop(rc, dtm)
 
-    terra::writeRaster(rc_crop, fs::path(output_dir, "dah_LS.tif"), overwrite = TRUE)
+    terra::writeRaster(rc_crop, fs::path(output_dir, "dah_LS.tif"), overwrite = overwrite)
   }
 
   ## 3. Landform Class
@@ -205,7 +205,7 @@ create_landscape_covariates <- function(dtm = dtm,
   land_class <- terra::crop(land_class, dtm)
   names(land_class) <- "landclass"
 
-  terra::writeRaster(land_class, file.path(output_dir, "landform_LS.tif"), overwrite = TRUE)
+  terra::writeRaster(land_class, file.path(output_dir, "landform_LS.tif"), overwrite = overwrite)
 
   # remove temp Saga files
   # unlink(paste(output, "saga", sep = "/"), recursive = TRUE)
