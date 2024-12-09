@@ -12,7 +12,8 @@ create_landscape_covariates(
   sieve_size = 10,
   dah_threshold = 0.2,
   saga_param = list(T_SLOPE = 64, TPCTL_V = 6, T_PCTL_R = 2, P_SLOPE = 4, P_PCTL = 3,
-    UPDATE = 1, CLASSIFY = 1, MAX_RES = 100)
+    UPDATE = 1, CLASSIFY = 1, MAX_RES = 100),
+  overwrite = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ define catergories. Default value is \code{10}.}
 
 \item{saga_param}{named list. Parameters that are fed to SAGA MRVBF function. IF supplied it must contain
 all parameters specified in the SAGA command.}
+
+\item{overwrite}{A \code{logical} value to determine if the output files should be overwritten.
+Default is \code{TRUE}.}
 }
 \value{
 path to the output directory where files are written (invisibly).
