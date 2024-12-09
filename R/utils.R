@@ -50,7 +50,7 @@ read_crop <- function(f, poly, tmp) {
 }
 
 
-# Add function to check inputs used in all PEMr
+# Add function to check input SpatRast location or read file in
 
 read_spatrast_if_necessary = function(spatRast){
 
@@ -58,12 +58,13 @@ read_spatrast_if_necessary = function(spatRast){
     spatRast <- terra::rast(spatRast)
 
   } else if (!inherits(spatRast, c("SpatRaster"))) {
-    cli::cli_abort("{.var spatRast} must be a SpatRaster or a path to a file")
+    cli::cli_abort("{.var spatRast} must be a SpatRaster or a path to SpatRaster file")
   }
 
   return(spatRast)
 
 }
+
 
 
 
