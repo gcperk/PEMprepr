@@ -35,16 +35,12 @@ get_cded_dem <- function(
     write_output = TRUE,
     overwrite = FALSE,
     ...) {
-  if (inherits(aoi, c("character"))) {
-    aoi <- terra::rast(aoi)
-  } else if (!inherits(aoi, c("SpatRaster"))) {
-    cli::cli_abort("{.var aoi} must be a SpatRaster or a path to a file")
-  }
+
+  aoi <- read_spatrast_if_necessary(aoi)
 
   aoi_template <- make_aoi_template(aoi, res)
 
   cded_raw <- bcmaps::cded_terra(aoi_template, ...)
-  # cded_raw <- bcmaps::cded_terra(aoi_template)#, ...)
 
   cded <- terra::project(cded_raw, aoi_template)
 

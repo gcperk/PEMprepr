@@ -60,13 +60,7 @@ create_landscape_covariates <- function(dtm = dtm,
 
   #--- dtm ---#
 
-  if (inherits(dtm, c("character"))) {
-    if (!file.exists(fs::path(dtm))) {
-      cli::cli_abort("{.var dtm} must point to an existing dtm file")
-    } else {
-      dtm <- terra::rast(dtm)
-    }
-  }
+  dtm <- read_spatrast_if_necessary(dtm)
 
   #--- get resolution of dtm ---#
   rn <- terra::res(dtm)[1]
@@ -79,7 +73,7 @@ create_landscape_covariates <- function(dtm = dtm,
 
   #--- Create necessary output directories ---#
   output_dir <- fs::path(out_dir, paste0(rn, "m"), "modules")
-  
+
   raw_dem_dir <- fs::path(output_dir, "dem_raw")
 
   fs::dir_create(c(raw_dem_dir, fs::path(output_dir, layers)))

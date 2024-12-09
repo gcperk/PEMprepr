@@ -30,11 +30,8 @@ create_bgc_template <- function(
     write_output = TRUE,
     out_dir = PEMprepr::read_fid()$dir_1020_covariates$path_rel) {
 
-  if (inherits(template_rast, c("character"))) {
-    template_rast <- terra::rast(template_rast)
-  } else if (!inherits(template_rast, c("SpatRaster"))) {
-    cli::cli_abort("{.var template_rast} must be a SpatRaster or a path to a file")
-  }
+
+  template_rast <- read_spatrast_if_necessary(template_rast)
 
   bec_vec <- terra::vect(bec)
 

@@ -55,13 +55,7 @@ create_covariates <- function(dtm = NULL,
 
   #--- dtm ---#
 
-  if (inherits(dtm, c("character"))) {
-    if (!file.exists(fs::path(dtm))) {
-      cli::cli_abort("{.var dtm} must point to an existing dtm file")
-    } else {
-      dtm <- terra::rast(dtm)
-    }
-  }
+  dtm <- read_spatrast_if_necessary(dtm)
 
   #--- get resolution of dtm ---#
   rn <- terra::res(dtm)[1]
