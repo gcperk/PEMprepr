@@ -76,19 +76,20 @@ find_saga_path <- function(root = NULL) {
 #' `options("pemprepr.saga_path" = "path to your saga_cmd(.exe) file")`. This
 #' will ensure SAGA is always found when it is needed.
 #'
-#' @param saga_path Path to `saga_cmd` executable file. By default consults
+#' @param saga_path Path to `saga_cmd` executable file. By default checks to 
+#' see if it has been set yet this sessions, and if not consults
 #' `getOption("pemprepr.saga_path")`.
 #'
 #' @return path to saga_cmd executable
 #' @seealso [find_saga_path()]
 #' @export
 saga_cmd <- function(
-    saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)
+    saga_path = saved_saga_path()
 ) {
 
   saga_cmd_string <- saga_cmd_string()
   # If not specified, check for system saga
-  saga_path <- saga_path %||% Sys.which(saga_cmd_string)
+  saga_path <- saga_path %||% getOption("pemprepr.saga_path") %||% Sys.which(saga_cmd_string)
 
   if (saga_path == "") {
     cli::cli_abort(
@@ -128,3 +129,5 @@ saga_version <- function(saga_path) {
   stringr::str_extract(string_version, "[-.0-9]{3,10}") |>
     as.numeric_version()
 }
+
+saved_saga_path <- function() ._pempreprenv_$saga_path
