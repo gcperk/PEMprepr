@@ -45,11 +45,7 @@ snap_aoi <- function(
 
   aoi <- aoi %||% look_for_aoi()
 
-  if (inherits(aoi, c("character"))) {
-    aoi <- sf::st_read(aoi, quiet = TRUE)
-  } else if (!inherits(aoi, c("sf", "sfc"))) {
-    cli::cli_abort("{.var aoi} must be an sf or an sfc object or a path to a file")
-  }
+  aoi <- read_sf_if_necessary(aoi)
 
   box <- snap_bbox(aoi, method = method, buffer = buffer)
 
