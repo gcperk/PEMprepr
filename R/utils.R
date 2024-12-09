@@ -50,7 +50,7 @@ read_crop <- function(f, poly, tmp) {
 }
 
 
-# Add function to check input SpatRast location or read file in
+# Add function to check input SpatRast location or read file
 
 read_spatrast_if_necessary = function(spatRast){
 
