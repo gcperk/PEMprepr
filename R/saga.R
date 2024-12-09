@@ -109,7 +109,7 @@ saga_cmd <- function(
 
   ._pempreprenv_$saga_path <- saga_path
 
-  saga_path
+  unname(saga_path)
 }
 
 saga_cmd_string <- function() {
