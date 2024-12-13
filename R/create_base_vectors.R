@@ -26,26 +26,13 @@ create_base_vectors <- function(
       "aoi_snapped.gpkg"
     ),
     out_dir = PEMprepr::read_fid()$dir_1010_vector$path_abs) {
+  
+  aoi <- read_sf_if_necessary(aoi)
+
   if (is.null(out_dir)) {
     cli::cli_abort("{.var out_dir} is an invalid file path string")
   }
 
-  UseMethod("create_base_vectors")
-}
-
-#' @export
-create_base_vectors.default <- function(aoi, out_dir) {
-  cli::cli_abort("No method for object of class {.var {class(aoi)}}")
-}
-
-#' @export
-create_base_vectors.character <- function(aoi, out_dir) {
-  aoi_sf <- sf::st_read(aoi)
-  create_base_vectors(aoi_sf, out_dir)
-}
-
-#' @export
-create_base_vectors.sf <- function(aoi, out_dir) {
   # Detect the CRS of the sf object
   if (is.na(sf::st_crs(aoi))) {
     cli::cli_abort("CRS is not assigned. Use {.fn sf::st_crs} to assign a valid CRS to aoi")
@@ -91,8 +78,6 @@ create_base_vectors.sf <- function(aoi, out_dir) {
   invisible(out_dir)
 }
 
-#' @export
-create_base_vectors.sfc <- create_base_vectors.sf
 ### 1) Get_BEC ----------------------------
 get_BEC <- function(aoi, out_dir) {
   cli::cli_alert_info("Downloading BEC layers")

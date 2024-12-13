@@ -4,12 +4,11 @@
 \alias{saga_cmd}
 \title{Validate and return the path to SAGA \code{saga_cmd(.exe)} executable}
 \usage{
-saga_cmd(
-  saga_path = getOption("pemprepr.saga_path", default = ._pempreprenv_$saga_path)
-)
+saga_cmd(saga_path = saved_saga_path())
 }
 \arguments{
-\item{saga_path}{Path to \code{saga_cmd} executable file. By default consults
+\item{saga_path}{Path to \code{saga_cmd} executable file. By default checks to
+see if it has been set yet this sessions, and if not consults
 \code{getOption("pemprepr.saga_path")}.}
 }
 \value{

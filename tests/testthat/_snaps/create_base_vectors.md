@@ -4,7 +4,7 @@
       snap_aoi(1, out_dir = fs::path(outdir, "snap"))
     Condition
       Error in `snap_aoi()`:
-      ! `aoi` must be an sf or an sfc object or a path to a file
+      ! `aoi` must be an sf object or a path to an sf object
 
 # create_base_vectors works with sf and/or path to file
 
